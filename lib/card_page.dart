@@ -30,6 +30,21 @@ class MyCardView extends StatelessWidget {
   final int _selectedIndex;
   final String url;
 
+  Future<String> fetchHtmlFromUrl(String url) async {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      // リクエストが成功した場合、HTMLを返します。
+      // 取得したHTMLのボディをパースする。
+      // final document = parse(response.body);
+      // final document_body = document.body;
+      return response.body;
+    } else {
+      // リクエストが失敗した場合、エラーをスローします。
+      throw Exception('Failed to load HTML from $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,17 +66,3 @@ class MyCardView extends StatelessWidget {
   }
 }
 
-Future<String> fetchHtmlFromUrl(String url) async {
-  final response = await http.get(Uri.parse(url));
-
-  if (response.statusCode == 200) {
-    // リクエストが成功した場合、HTMLを返します。
-    // 取得したHTMLのボディをパースする。
-    // final document = parse(response.body);
-    // final document_body = document.body;
-    return response.body;
-  } else {
-    // リクエストが失敗した場合、エラーをスローします。
-    throw Exception('Failed to load HTML from $url');
-  }
-}
