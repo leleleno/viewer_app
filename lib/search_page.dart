@@ -1,17 +1,24 @@
 import 'package:first_app/uis.dart';
 import 'package:flutter/material.dart';
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+class SearchPage extends StatelessWidget{
+  const SearchPage({super.key})
+  @override
+  Widget build(BuildContext context) {
+    return const SearchPageView();
+  }
+
+}
+class SearchPageView extends StatefulWidget {
+  const SearchPageView({super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _MySearchPageState();
-    // TODO: implement createState
+    return _MySearchPageViewState();
   }
 }
 
-class _MySearchPageState extends State<SearchPage> {
+class _MySearchPageViewState extends State<SearchPageView> {
   final int _selectedIndex = 1;
   @override
   Widget build(BuildContext context) {
@@ -24,12 +31,14 @@ class _MySearchPageState extends State<SearchPage> {
             width: double.infinity,
             child: TextField(
               decoration: InputDecoration(
-                  border: InputBorder.none, hintText: "Enter a search word"),
+                  icon: Icon(Icons.abc),
+                  border: InputBorder.none,
+                  hintText: "Enter a search word"
+                ),
             ),
           ),
           Center(
-            child: Text("Test"),
-          )
+            ),
         ],
       ),
     );
