@@ -2,12 +2,11 @@ import 'package:first_app/uis.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatelessWidget{
-  const SearchPage({super.key})
+  const SearchPage({super.key});
   @override
   Widget build(BuildContext context) {
     return const SearchPageView();
   }
-
 }
 class SearchPageView extends StatefulWidget {
   const SearchPageView({super.key});
@@ -38,6 +37,10 @@ class _MySearchPageViewState extends State<SearchPageView> {
             ),
           ),
           Center(
+            child: ElevatedButton(
+              onPressed: null,
+              child: Text("Press button")
+            ),
             ),
         ],
       ),
