@@ -29,6 +29,7 @@ Drawer myDrawer(BuildContext context, int index) {
           title: const Text('home'),
           selected: index == 0,
           onTap: () {
+            Navigator.pop(context);
             Navigator.of(context).popUntil((route) => route.isFirst);
           },
         ),
@@ -37,6 +38,7 @@ Drawer myDrawer(BuildContext context, int index) {
           title: const Text('search'),
           selected: index == 1,
           onTap: () {
+            Navigator.pop(context);
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const SearchPage()));
           },
