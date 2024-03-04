@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 
 
 
-class MyCardView extends StatelessWidget {
-  const MyCardView(String s, {super.key, required this.url});
+class MyCard extends StatelessWidget {
+  const MyCard(String s, {super.key, required this.url});
 
   // 取得先のURLを元にして、Uriオブジェクトを生成する。
   final String url;
@@ -16,6 +16,22 @@ class MyCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context){
+    return MyCardView(selectedIndex: _selectedIndex, url: url);
+  }
+}
+
+class MyCardView extends StatelessWidget {
+  const MyCardView({
+    super.key,
+    required int selectedIndex,
+    required this.url,
+  }) : _selectedIndex = selectedIndex;
+
+  final int _selectedIndex;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppbar(context, "Card"),
       drawer: myDrawer(context, _selectedIndex),
