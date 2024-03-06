@@ -14,14 +14,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My first app',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
       home: Home(),
-      routes: <String, WidgetBuilder> {
+      routes: <String, WidgetBuilder>{
         '/home': (BuildContext context) => Home(),
       },
     );
   }
 }
-

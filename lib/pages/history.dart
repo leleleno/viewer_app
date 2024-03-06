@@ -13,7 +13,6 @@ class History extends StatefulWidget {
 class _History extends State<History> {
   final int _selectedIndex = 3;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,11 +30,6 @@ class _History extends State<History> {
           ],
         ),
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        tooltip: 'Increment',
-        child: Icon(Icons.favorite),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

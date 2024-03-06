@@ -13,7 +13,6 @@ class Favorite extends StatefulWidget {
 class _Favorite extends State<Favorite> {
   final int _selectedIndex = 2;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,11 +30,6 @@ class _Favorite extends State<Favorite> {
           ],
         ),
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

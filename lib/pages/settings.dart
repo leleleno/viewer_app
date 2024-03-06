@@ -15,7 +15,6 @@ class _Settings extends State<Settings> {
 
   bool _lights = false;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,13 +24,13 @@ class _Settings extends State<Settings> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start ,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             SwitchListTile(
               title: const Text("Dark mode"),
               value: _lights,
               onChanged: (bool value) {
-                setState((){
+                setState(() {
                   _lights = value;
                 });
               },
@@ -43,11 +42,6 @@ class _Settings extends State<Settings> {
           ],
         ),
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        tooltip: 'Increment',
-        child: Icon(Icons.favorite),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
