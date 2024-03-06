@@ -6,12 +6,7 @@ import 'package:flutter/material.dart';
 
 AppBar myAppbar(BuildContext context, String title) {
   return AppBar(
-    // TRY THIS: Try changing the color here to a specific color (to
-    // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-    // change color while the other colors stay the same.
     backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    // Here we take the value from the MyHomePage object that was created by
-    // the App.build method, and use it to set our appbar title.
     title: Text(title),
   );
 }
@@ -31,7 +26,6 @@ Drawer myDrawer(BuildContext context, int index) {
           title: const Text('home'),
           selected: index == 0,
           onTap: () {
-            Navigator.pop(context);
             Navigator.of(context).popUntil((route) => route.isFirst);
           },
         ),
@@ -41,11 +35,10 @@ Drawer myDrawer(BuildContext context, int index) {
           selected: index == 1,
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => Search(),
-                  settings: const RouteSettings(name: "/search"),
-                ));
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Search(),
+              settings: const RouteSettings(name: "/search"),
+            ));
           },
         ),
         ListTile(
@@ -54,11 +47,10 @@ Drawer myDrawer(BuildContext context, int index) {
           selected: index == 2,
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => Favorite(),
-                  settings: const RouteSettings(name: "/favorite"),
-                ));
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Favorite(),
+              settings: const RouteSettings(name: "/favorite"),
+            ));
           },
         ),
         ListTile(
@@ -67,11 +59,10 @@ Drawer myDrawer(BuildContext context, int index) {
           selected: index == 3,
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => History(),
-                  settings: const RouteSettings(name: "/history"),
-                ));
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => History(),
+              settings: const RouteSettings(name: "/history"),
+            ));
           },
         ),
         const Divider(),
@@ -81,16 +72,13 @@ Drawer myDrawer(BuildContext context, int index) {
           selected: index == 4,
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => Settings(),
-                  settings: const RouteSettings(name: "/settings"),
-                ));
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Settings(),
+              settings: const RouteSettings(name: "/settings"),
+            ));
           },
         ),
       ],
     ),
   );
 }
-
-void setState(Null Function() param0) {}
