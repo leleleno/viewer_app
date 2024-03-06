@@ -42,7 +42,10 @@ Drawer myDrawer(BuildContext context, int index) {
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SearchPage()));
+                MaterialPageRoute(
+                  builder: (context) => Search(),
+                  settings: const RouteSettings(name: "/search"),
+                ));
           },
         ),
         ListTile(
@@ -52,7 +55,10 @@ Drawer myDrawer(BuildContext context, int index) {
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const FavoritePage()));
+                MaterialPageRoute(
+                  builder: (context) => Favorite(),
+                  settings: const RouteSettings(name: "/favorite"),
+                ));
           },
         ),
         ListTile(
@@ -62,7 +68,10 @@ Drawer myDrawer(BuildContext context, int index) {
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const HistoryPage()));
+                MaterialPageRoute(
+                  builder: (context) => History(),
+                  settings: const RouteSettings(name: "/history"),
+                ));
           },
         ),
         const Divider(),
@@ -73,7 +82,10 @@ Drawer myDrawer(BuildContext context, int index) {
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SettingsPage()));
+                MaterialPageRoute(
+                  builder: (context) => Settings(),
+                  settings: const RouteSettings(name: "/settings"),
+                ));
           },
         ),
       ],

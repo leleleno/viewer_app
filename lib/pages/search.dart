@@ -1,32 +1,26 @@
+import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 
-class SearchPage extends StatelessWidget{
-  const SearchPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const SearchPageView();
-  }
-}
-class SearchPageView extends StatefulWidget {
-  const SearchPageView({super.key});
+class Search extends StatefulWidget {
+  const Search({super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _MySearchPageViewState();
+    return _MySearchState();
   }
 }
 
-class _MySearchPageViewState extends State<SearchPageView> {
+class _MySearchState extends State<Search> {
   final int _selectedIndex = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppbar(context, "Search Page"),
       drawer: myDrawer(context, _selectedIndex),
-      body: const Column(
+      body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             width: double.infinity,
             child: TextField(
               decoration: InputDecoration(
@@ -38,8 +32,15 @@ class _MySearchPageViewState extends State<SearchPageView> {
           ),
           Center(
             child: ElevatedButton(
-              onPressed: null,
-              child: Text("Press button")
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => CardView(page_url: '1',),
+                      settings: const RouteSettings(name: "/page_url")
+                    )
+                    );
+              },
+              child: const Text("Press button to show cards")
             ),
             ),
         ],

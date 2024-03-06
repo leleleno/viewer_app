@@ -1,17 +1,19 @@
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class Settings extends StatefulWidget {
+  const Settings({super.key});
 
   final String title = "Settings";
 
   @override
-  State<SettingsPage> createState() => _SettingsPage();
+  State<Settings> createState() => _Settings();
 }
 
-class _SettingsPage extends State<SettingsPage> {
+class _Settings extends State<Settings> {
   final int _selectedIndex = 4;
+
+  bool _lights = false;
 
 
   @override
@@ -19,13 +21,23 @@ class _SettingsPage extends State<SettingsPage> {
     return Scaffold(
       appBar: myAppbar(context, widget.title),
       drawer: myDrawer(context, _selectedIndex),
-      body: const Center(
+      body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start ,
           children: <Widget>[
-            Text(
+            SwitchListTile(
+              title: const Text("Dark mode"),
+              value: _lights,
+              onChanged: (bool value) {
+                setState((){
+                  _lights = value;
+                });
+              },
+              subtitle: const Text("Change the status if you like dark mode."),
+            ),
+            const Text(
               'This is Settings page.',
             ),
           ],

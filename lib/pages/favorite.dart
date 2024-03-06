@@ -1,16 +1,16 @@
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 
-class FavoritePage extends StatefulWidget {
-  const FavoritePage({super.key});
+class Favorite extends StatefulWidget {
+  const Favorite({super.key});
 
   final String title = "Favorite";
 
   @override
-  State<FavoritePage> createState() => _FavoritePage();
+  State<Favorite> createState() => _Favorite();
 }
 
-class _FavoritePage extends State<FavoritePage> {
+class _Favorite extends State<Favorite> {
   final int _selectedIndex = 2;
 
 

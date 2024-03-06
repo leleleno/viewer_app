@@ -1,16 +1,16 @@
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 
-class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+class History extends StatefulWidget {
+  const History({super.key});
 
   final String title = "History";
 
   @override
-  State<HistoryPage> createState() => _HistoryPage();
+  State<History> createState() => _History();
 }
 
-class _HistoryPage extends State<HistoryPage> {
+class _History extends State<History> {
   final int _selectedIndex = 3;
 
 
