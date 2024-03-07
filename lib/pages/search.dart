@@ -1,6 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' show parse;
+
 class Search extends StatefulWidget {
   const Search({super.key, required this.inputText});
   final String inputText;
@@ -15,12 +22,13 @@ class _MySearchState extends State<Search> {
   late String _input;
   late TextEditingController _controller;
   @override
-  void initState(){
+  void initState() {
     super.initState();
     // 初期化時にWidgetの引数を渡す
     _input = widget.inputText;
     _controller = TextEditingController(text: _input);
   }
+
   final int _selectedIndex = 1;
   // TextFieldのController作成
   @override
@@ -28,46 +36,47 @@ class _MySearchState extends State<Search> {
     return Scaffold(
       appBar: myAppbar(context, "Search Page"),
       drawer: myDrawer(context, _selectedIndex),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _controller,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.black
-              ),
-              decoration:  InputDecoration(
-                prefixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    // Trigger onSubmitted event manually
-                    String value = _controller.text;
-                    setState(() {
-                      _input = value;
-                    });
-                  },
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: (){
-                    // TextFieldのテキストをクリアする
-                    _controller.clear();
-                  },
-                ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _controller,
+                style: const TextStyle(fontSize: 18, color: Colors.black),
+                decoration: InputDecoration(
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      // Trigger onSubmitted event manually
+                      String value = _controller.text;
+                      setState(() {
+                        _input = value;
+                      });
+                    },
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      // TextFieldのテキストをクリアする
+                      _controller.clear();
+                    },
+                  ),
                   hintText: "Search bar",
                   border: const OutlineInputBorder(),
+                ),
+                onSubmitted: (value) {
+                  setState(() {
+                    _input = value;
+                  });
+                },
               ),
-              onSubmitted: (value) {
-                setState(() {
-                  _input = value;
-                });
-              },
             ),
-          ),
-          CardListView(inputText: _input,),
-        ],
+            CardListView(
+              inputText: _input,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -81,41 +90,127 @@ class CardListView extends StatefulWidget {
   State<CardListView> createState() => _CardListViewState();
 }
 
+// class _CardListViewState extends State<CardListView> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<String>(
+//       future: fetchSample(context, widget.inputText),
+//       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const CircularProgressIndicator();
+//         } else if (snapshot.hasError) {
+//           return Text('Error: ${snapshot.error}');
+//         } else {
+//           return Text(snapshot.data!);
+//         }
+//       },
+//     );
+//   }
+// }
 class _CardListViewState extends State<CardListView> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => CardView(page_url: 'https://yugioh-wiki.net/index.php?%A1%D4%A5%C8%A1%BC%A5%C6%A5%E0%A5%DD%A1%BC%A5%EB%A1%D5',),
-                settings: const RouteSettings(name: "/card/%A1%D4%A5%C8%A1%BC%A5%C6%A5%E0%A5%DD%A1%BC%A5%EB%A1%D5")
-              )
-              );
-        },
-        child: const Text("Press button to show cards")
-      ),
-      );
+    return FutureBuilder<List<Widget>>(
+      future: fetchSearchResult(context, widget.inputText),
+      builder: (BuildContext context, AsyncSnapshot<List<Widget>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          if (snapshot.data!.isEmpty || snapshot.data == null) {
+            return const Center(
+              child: Text("There is no data!"),
+            );
+          } else {
+            return Column(
+              children: snapshot.data!,
+            );
+          }
+        }
+      },
+    );
   }
 }
 
-Future<List> searchWiki(String keyword) async{
+Future<List<Widget>> fetchSearchResult(
+    BuildContext context, String keyword) async {
   // 1. http通信に必要なデータを準備をする
-  final response = await Uri.parse('https://yugioh-wiki.net/?cmd=list');
-  List retList = [];
-  for (int i = 0; i <10; i++){
-    retList.add(
-      const Card(
-        child: ListTile(
-          title: Text("name"),
-          subtitle: Text("description"),
-        ),
-      )
-    );
+  var url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
+  var data = {
+    'encode_hint': 'ぷ',
+    'word': keyword,
+    'type': 'AND',
+  };
+
+  var response = await http.post(url, body: data);
+  // List for return
+  List<Widget> retList = [];
+  // 通信の成否に合わせてReturn
+  if (response.statusCode != 200) {
+    return retList;
   }
-  // 2. Qiita APIにリクエストを送る
-  // 3. 戻り値をArticleクラスの配列に変換
-  // 4. 変換したArticleクラスの配列を返す(returnする)
+  // 成功したらhtml parser
+  final decodedBody =
+      await CharsetConverter.decode("EUC-JP", response.bodyBytes);
+  final document = parse(decodedBody);
+  var lists = document.body!.getElementsByTagName('li');
+  if (lists.isEmpty) {
+    return retList;
+  }
+  for (var li in lists) {
+    var aTag = li.querySelector('a');
+    if (aTag != null) {
+      String url = aTag.attributes['href'] ?? '';
+      String text = aTag.text;
+      var liTile = ListTile(
+        title: Text(text),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => CardView(page_url: url),
+            settings: RouteSettings(name: "/card/$text"),
+          ));
+        },
+      );
+      retList.add(liTile);
+    }
+  }
+
   return retList;
+}
+
+Future<String> fetchSample(BuildContext context, String keyword) async {
+  // 1. http通信に必要なデータを準備をする
+  var url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
+  var data = {
+    'encode_hint': 'ぷ',
+    'word': keyword,
+    'type': 'AND',
+  };
+
+  final response = await http.post(url, body: data);
+  final decodedBody =
+      await CharsetConverter.decode("EUC-JP", response.bodyBytes);
+  final document = parse(decodedBody);
+  var lists = document.body!.getElementsByTagName("li");
+  List<String> retList = [];
+
+  for (var li in lists) {
+    var aTag = li.querySelector('a');
+    if (aTag != null) {
+      String url = aTag.attributes['href'] ?? '';
+      String text = aTag.text;
+      var liTile = ListTile(
+        title: Text(text),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => CardView(page_url: url),
+            settings: RouteSettings(name: "/card/$text"),
+          ));
+        },
+      );
+      retList.add(text);
+    }
+  }
+  return retList.join("\n");
 }

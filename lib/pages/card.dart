@@ -1,7 +1,8 @@
+import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-
 
 class CardView extends StatefulWidget {
   const CardView({super.key, required this.page_url});
@@ -19,11 +20,11 @@ class _CardViewState extends State<CardView> {
   bool _is_favorite = false;
 
   @override
-  Widget build(BuildContext context)  {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppbar(context, widget.title),
       drawer: myDrawer(context, _selectedIndex),
-      body:  Column(
+      body: Column(
         children: [
           // 検索バー
           MySearchBar(),
@@ -34,7 +35,7 @@ class _CardViewState extends State<CardView> {
             future: fetchCardData(context, widget.page_url),
             builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
@@ -59,12 +60,15 @@ class _CardViewState extends State<CardView> {
   }
 }
 
-
 Future<Widget> fetchCardData(BuildContext context, String page_url) async {
   // 取得先のURLを元にして、Uriオブジェクトを生成する。
   final response = await http.get(
     Uri.http(page_url),
   );
+  // 成功したらhtml parser
+  final decodedBody =
+      await CharsetConverter.decode("EUC-JP", response.bodyBytes);
+  final document = parse(decodedBody);
   // responseに関する処理
   return Container(
     width: double.infinity,
