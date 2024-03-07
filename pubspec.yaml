@@ -38,6 +38,7 @@ dependencies:
   flutter_html: ^2.2.1
   http: ^1.2.1
   html: ^0.15.4
+  riverpod: ^2.5.0
 
 dev_dependencies:
   flutter_test:
