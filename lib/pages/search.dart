@@ -164,7 +164,9 @@ Future<List<Widget>> fetchSearchResult(
       String url = aTag.attributes['href'] ?? '';
       String text = aTag.text;
       var liTile = ListTile(
-        title: Text(text),
+        title: Column(
+          children: [Text(text), Text(url)],
+        ),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => CardView(page_url: url),

@@ -76,6 +76,7 @@ class MySearchBar extends StatefulWidget {
   @override
   _MySearchBarState createState() => _MySearchBarState();
 }
+
 class _MySearchBarState extends State<MySearchBar> {
   TextEditingController _controller = TextEditingController();
 
@@ -85,25 +86,26 @@ class _MySearchBarState extends State<MySearchBar> {
       padding: const EdgeInsets.all(8.0),
       child: TextField(
         controller: _controller,
-        style: const TextStyle(
-          fontSize: 18,
-          color: Colors.black
-        ),
+        style: const TextStyle(fontSize: 18, color: Colors.black),
         decoration: InputDecoration(
           prefixIcon: IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
+              // TextFieldのテキストをクリアする
+              _controller.clear();
               // Trigger onSubmitted event manually
               String value = _controller.text;
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => Search(inputText: value,),
+                builder: (context) => Search(
+                  inputText: value,
+                ),
                 settings: RouteSettings(name: "/search/$value"),
               ));
             },
           ),
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
-            onPressed: (){
+            onPressed: () {
               // TextFieldのテキストをクリアする
               _controller.clear();
             },
@@ -112,8 +114,12 @@ class _MySearchBarState extends State<MySearchBar> {
           border: const OutlineInputBorder(),
         ),
         onSubmitted: (String value) {
+          // TextFieldのテキストをクリアする
+          _controller.clear();
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => Search(inputText: value,),
+            builder: (context) => Search(
+              inputText: value,
+            ),
             settings: RouteSettings(name: "/search/$value"),
           ));
         },
