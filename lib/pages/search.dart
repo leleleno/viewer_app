@@ -162,16 +162,20 @@ Future<List<Widget>> fetchSearchResult(
     var aTag = li.querySelector('a');
     if (aTag != null) {
       String url = aTag.attributes['href'] ?? '';
+      Uri uri = Uri.parse(url);
+
       String text = aTag.text;
+      String newUrl =
+          'https://yugioh-wiki.net/index.php?${Uri.encodeFull(text)}';
       var liTile = ListTile(
         title: Column(
-          children: [Text(text), Text(url)],
+          children: [Text(text), Text(newUrl)],
         ),
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CardView(page_url: url),
-            settings: RouteSettings(name: "/card/$text"),
-          ));
+          // Navigator.of(context).push(MaterialPageRoute(
+          //   builder: (context) => CardView(page_url: newUrl),
+          //   settings: RouteSettings(name: "/card/$text"),
+          // ));
         },
       );
       retList.add(liTile);
