@@ -30,18 +30,6 @@ Drawer myDrawer(BuildContext context, int index) {
           },
         ),
         ListTile(
-          leading: const Icon(Icons.search),
-          title: const Text('search'),
-          selected: index == 1,
-          onTap: () {
-            Navigator.pop(context);
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => Search(),
-              settings: const RouteSettings(name: "/search"),
-            ));
-          },
-        ),
-        ListTile(
           leading: const Icon(Icons.favorite),
           title: const Text('favorite'),
           selected: index == 2,
@@ -81,4 +69,55 @@ Drawer myDrawer(BuildContext context, int index) {
       ],
     ),
   );
+}
+
+class MySearchBar extends StatefulWidget {
+  const MySearchBar({super.key});
+  @override
+  _MySearchBarState createState() => _MySearchBarState();
+}
+class _MySearchBarState extends State<MySearchBar> {
+  TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: _controller,
+        style: const TextStyle(
+          fontSize: 18,
+          color: Colors.black
+        ),
+        decoration: InputDecoration(
+          prefixIcon: IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // Trigger onSubmitted event manually
+              String value = _controller.text;
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => Search(inputText: value,),
+                settings: RouteSettings(name: "/search/$value"),
+              ));
+            },
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: (){
+              // TextFieldのテキストをクリアする
+              _controller.clear();
+            },
+          ),
+          hintText: "Search bar",
+          border: const OutlineInputBorder(),
+        ),
+        onSubmitted: (String value) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => Search(inputText: value,),
+            settings: RouteSettings(name: "/search/$value"),
+          ));
+        },
+      ),
+    );
+  }
 }

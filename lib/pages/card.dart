@@ -1,10 +1,11 @@
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 
 class CardView extends StatefulWidget {
   const CardView({super.key, required this.page_url});
 
-  // 取得先のURLを元にして、Uriオブジェクトを生成する。
   final String page_url;
   final String title = "card name";
 
@@ -18,11 +19,31 @@ class _CardViewState extends State<CardView> {
   bool _is_favorite = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
     return Scaffold(
       appBar: myAppbar(context, widget.title),
       drawer: myDrawer(context, _selectedIndex),
-      body: fetchCardData(context, widget.page_url),
+      body:  Column(
+        children: [
+          // 検索バー
+          MySearchBar(),
+          // 隙間
+          Padding(padding: EdgeInsets.all(10)),
+          // ページコンテンツ、非同期処理なのでFuturebuilder
+          FutureBuilder(
+            future: fetchCardData(context, widget.page_url),
+            builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return snapshot.data ?? Container();
+              }
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
@@ -38,7 +59,13 @@ class _CardViewState extends State<CardView> {
   }
 }
 
-Widget fetchCardData(BuildContext context, String page_url) {
+
+Future<Widget> fetchCardData(BuildContext context, String page_url) async {
+  // 取得先のURLを元にして、Uriオブジェクトを生成する。
+  final response = await http.get(
+    Uri.http(page_url),
+  );
+  // responseに関する処理
   return Container(
     width: double.infinity,
     color: Colors.amberAccent,

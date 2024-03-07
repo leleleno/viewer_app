@@ -13,7 +13,7 @@ class Settings extends StatefulWidget {
 class _Settings extends State<Settings> {
   final int _selectedIndex = 4;
 
-  bool _lights = false;
+  bool _isDark = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +28,10 @@ class _Settings extends State<Settings> {
           children: <Widget>[
             SwitchListTile(
               title: const Text("Dark mode"),
-              value: _lights,
+              value: _isDark,
               onChanged: (bool value) {
                 setState(() {
-                  _lights = value;
+                  _isDark = value;
                 });
               },
               subtitle: const Text("Change the status if you like dark mode."),

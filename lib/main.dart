@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
+      // Homeにあるホーム画面を呼び出す
       home: Home(),
       routes: <String, WidgetBuilder>{
         '/home': (BuildContext context) => Home(),
