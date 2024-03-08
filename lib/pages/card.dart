@@ -1,15 +1,18 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html_v3/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+
 
 class CardView extends StatefulWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
 
-  final String pageUrl;
-  final String cardName;
+  final String? pageUrl;
+  final String? cardName;
 
   @override
   State<CardView> createState() => _CardViewState();
@@ -23,7 +26,7 @@ class _CardViewState extends State<CardView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: myAppbar(context, widget.cardName),
+      appBar: myAppbar(context, widget.cardName!),
       drawer: myDrawer(context, _selectedIndex),
       body: SingleChildScrollView(
         child: Padding(
@@ -66,10 +69,10 @@ class _CardViewState extends State<CardView> {
 }
 
 
-Future<Widget> fetchCardData(BuildContext context, String pageUrl) async {
+Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
   // 取得先のURLを元にして、Uriオブジェクトを生成する。
   final response = await http.get(
-    Uri.parse(pageUrl),
+    Uri.parse(pageUrl!),
   );
   // responseの成否で判定
   if(response.statusCode != 200){
@@ -86,14 +89,26 @@ Future<Widget> fetchCardData(BuildContext context, String pageUrl) async {
     return const Text("No data in the page.");
   }
   // Clear tags
-  List<String> selectors = [".jumpmenu", ".anchor_super","div","br", "table", "rb", ".tag"];
+  List<String> selectors = [".jumpmenu", ".anchor_super","div","br", "table", ".tag"];
   for (String selector in selectors){
     body.querySelectorAll(selector).forEach((element) {element.remove();});
   }
   // Stringにして全角スペース、ダガー、コメントアウト削除
-  String html =  body.outerHtml.replaceAll(RegExp(r"([　†]|<!--.*-->)"), "");
-  return SelectableText(html);
-// return Html(data:  html);
+  String html =  body.outerHtml.replaceAll(RegExp(r"([　†]|<!--.*-->)"), "").replaceAll(RegExp(r"(<rb>|<\/rb>)"), "");
+  // return SelectableText(html);
+  return Html(
+    data:  html,
+  onLinkTap: (String? url, RenderContext context, Map<String, String> attributes, dom.Element? element) {
+    if (RegExp(r"https://yugioh-wiki.net").hasMatch(url!)){
+      String newUrl = url!.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+      Navigator.of(context as BuildContext).push(
+        MaterialPageRoute(builder: (BuildContext context) => CardView(pageUrl: newUrl, cardName: attributes["text"]))
+    );} else {
+      Uri uri = Uri.https(url);
+      launchUrl(uri);
+    }
+  }
+  );
 }
 
 dom.Element getContentBetweenHeaders(int index, dom.Element body){
