@@ -18,9 +18,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Homeにあるホーム画面を呼び出す
-      home: Home(),
+      home: const Home(),
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => Home(),
+        '/home': (BuildContext context) => const Home(),
       },
     );
   }

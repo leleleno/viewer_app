@@ -8,6 +8,20 @@ AppBar myAppbar(BuildContext context, String title) {
   return AppBar(
     backgroundColor: Theme.of(context).colorScheme.inversePrimary,
     title: Text(title),
+    // search button add
+    actions: [IconButton(onPressed: (){
+      showModalBottomSheet(
+        context: context,
+        builder: (context){
+          return const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: MySearchBar(isFocus: true),
+          );
+        },
+        // backgroundColor: Colors.transparent,
+      );
+    },
+    icon: const Icon(Icons.search))],
   );
 }
 
@@ -27,6 +41,18 @@ Drawer myDrawer(BuildContext context, int index) {
           selected: index == 0,
           onTap: () {
             Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.search),
+          title: const Text('search'),
+          selected: index == 1,
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Search(inputText: ""),
+              settings: const RouteSettings(name: "/search"),
+            ));
           },
         ),
         ListTile(
@@ -72,19 +98,21 @@ Drawer myDrawer(BuildContext context, int index) {
 }
 
 class MySearchBar extends StatefulWidget {
-  const MySearchBar({super.key});
+  const MySearchBar({super.key, this.isFocus=false});
+  final bool isFocus;
   @override
   _MySearchBarState createState() => _MySearchBarState();
 }
 
 class _MySearchBarState extends State<MySearchBar> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(
+        autofocus: widget.isFocus,
         controller: _controller,
         style: const TextStyle(fontSize: 18, color: Colors.black),
         decoration: InputDecoration(

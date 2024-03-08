@@ -1,14 +1,15 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
 class CardView extends StatefulWidget {
-  const CardView({super.key, required this.page_url});
+  const CardView({super.key, required this.pageUrl, required this.cardName});
 
-  final String page_url;
-  final String title = "card name";
+  final String pageUrl;
+  final String cardName;
 
   @override
   State<CardView> createState() => _CardViewState();
@@ -17,74 +18,106 @@ class CardView extends StatefulWidget {
 class _CardViewState extends State<CardView> {
   final int _selectedIndex = -1;
 
-  bool _is_favorite = false;
+  ValueNotifier<bool> _is_favorite = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: myAppbar(context, widget.title),
+      appBar: myAppbar(context, widget.cardName),
       drawer: myDrawer(context, _selectedIndex),
-      body: Column(
-        children: [
-          // 検索バー
-          MySearchBar(),
-          // 隙間
-          Padding(padding: EdgeInsets.all(10)),
-          // ページコンテンツ、非同期処理なのでFuturebuilder
-          FutureBuilder(
-            future: fetchCardData(context, widget.page_url),
-            builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return snapshot.data ?? Container();
-              }
-            },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              // ページコンテンツ、非同期処理なのでFuturebuilder
+              FutureBuilder(
+                future: fetchCardData(context, widget.pageUrl),
+                builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return SelectableText('Network Error: ${snapshot.error}');
+                  } else {
+                    return snapshot.data!;
+                  }
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            _is_favorite = !_is_favorite;
-          });
+          _is_favorite.value = !_is_favorite.value;
         },
         tooltip: "Add to Favorite",
-        child: Icon(
-          _is_favorite ? Icons.favorite : Icons.favorite_border,
+        child: ValueListenableBuilder(
+          valueListenable: _is_favorite,
+          builder: (context, value, child) {
+            return Icon(
+              value ? Icons.favorite : Icons.favorite_border,
+            );
+          }
         ),
       ),
     );
   }
 }
 
-Future<Widget> fetchCardData(BuildContext context, String page_url) async {
+
+Future<Widget> fetchCardData(BuildContext context, String pageUrl) async {
   // 取得先のURLを元にして、Uriオブジェクトを生成する。
   final response = await http.get(
-    Uri.http(page_url),
+    Uri.parse(pageUrl),
   );
-  // 成功したらhtml parser
+  // responseの成否で判定
+  if(response.statusCode != 200){
+    return const Text("Cannot get the data.");
+  }
+  // EUC-JP decode
   final decodedBody =
       await CharsetConverter.decode("EUC-JP", response.bodyBytes);
+  // htmlをパース
   final document = parse(decodedBody);
-  // responseに関する処理
-  return Container(
-    width: double.infinity,
-    color: Colors.amberAccent,
-    padding: const EdgeInsets.all(10),
-    child: const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Card effect here"),
-        Padding(padding: EdgeInsets.all(10.0)),
-        Text("Description here"),
-        Padding(padding: EdgeInsets.all(10.0)),
-        Text("Tips here"),
-        Padding(padding: EdgeInsets.all(10.0)),
-        Text("Q & A here"),
-      ],
-    ),
-  );
+  // htmlの内容で分岐
+  final body = document.querySelector('#body');
+  if (body == null){
+    return const Text("No data in the page.");
+  }
+  // Clear tags
+  List<String> selectors = [".jumpmenu", ".anchor_super","div","br", "table", "rb", ".tag"];
+  for (String selector in selectors){
+    body.querySelectorAll(selector).forEach((element) {element.remove();});
+  }
+  // Stringにして全角スペース、ダガー、コメントアウト削除
+  String html =  body.outerHtml.replaceAll(RegExp(r"([　†]|<!--.*-->)"), "");
+  return SelectableText(html);
+// return Html(data:  html);
+}
+
+dom.Element getContentBetweenHeaders(int index, dom.Element body){
+  // header get
+  List<dom.Element> headers = body.querySelectorAll('h2, h3');
+
+  if (index < 0 || index >= headers.length) {
+    throw ArgumentError('index is out of range');
+  }
+
+  dom.Element start = headers[index];
+  dom.Element? end = index + 1 < headers.length ? headers[index + 1] : null;
+  List<dom.Element> retList = [start];
+  dom.Element? next = start.nextElementSibling;
+
+  while (next != end && next != null) {
+    retList.add(next);
+    next = next.nextElementSibling;
+  }
+  // Join all elements in retList into one string
+  String allElements = retList.map((e) => e.outerHtml).join('');
+
+  // Create a new Element with allElements as its innerHtml
+  dom.Element result = dom.Element.tag('div');
+  result.innerHtml = allElements;
+  return result;
 }

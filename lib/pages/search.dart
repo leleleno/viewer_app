@@ -70,7 +70,7 @@ class _MySearchState extends State<Search> {
                 },
               ),
             ),
-            CardListView(
+            if (_input != "") CardListView(
               inputText: _input,
             ),
           ],
@@ -95,7 +95,7 @@ class _CardListViewState extends State<CardListView> {
       future: fetchSearchResult(context, widget.inputText),
       builder: (BuildContext context, AsyncSnapshot<List<Widget>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return SelectableText('Network Error: ${snapshot.error}');
         } else {
@@ -148,21 +148,21 @@ Future<List<Widget>> fetchSearchResult(
     if (aTag != null) {
       // <a> Tagから リンクとページ名を取得
       String linkUrl = aTag.attributes['href'] ?? '';
+      // urlを正規表現で置換
       String newUrl = linkUrl.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+      // card name
       String text = aTag.text;
-      // String newUrl =
-      //     'https://yugioh-wiki.net/index.php?${Uri.encodeFull(text)}';
-      // 正規表現でカード名かどうか判断
       if (iscardTitle.hasMatch(text)){
         var liTile = ListTile(
           title: Column(
-            children: [Text(text), SelectableText(linkUrl), SelectableText(newUrl)],
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Text(text)],
           ),
           onTap: () {
-            // Navigator.of(context).push(MaterialPageRoute(
-            //   builder: (context) => CardView(page_url: newUrl),
-            //   settings: RouteSettings(name: "/card/$text"),
-            // ));
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => CardView(pageUrl: newUrl, cardName: text,),
+              settings: RouteSettings(name: "/card/$text"),
+            ));
           },
         );
         retList.add(liTile);
@@ -171,40 +171,4 @@ Future<List<Widget>> fetchSearchResult(
   }
 
   return retList;
-}
-
-Future<String> fetchSample(BuildContext context, String keyword) async {
-  // 1. http通信に必要なデータを準備をする
-  var url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
-  var data = {
-    'encode_hint': 'ぷ',
-    'word': keyword,
-    'type': 'AND',
-  };
-
-  final response = await http.post(url, body: data);
-  final decodedBody =
-      await CharsetConverter.decode("EUC-JP", response.bodyBytes);
-  final document = parse(decodedBody);
-  var lists = document.body!.getElementsByTagName("li");
-  List<String> retList = [];
-
-  for (var li in lists) {
-    var aTag = li.querySelector('a');
-    if (aTag != null) {
-      String url = aTag.attributes['href'] ?? '';
-      String text = aTag.text;
-      var liTile = ListTile(
-        title: Text(text),
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => CardView(page_url: url),
-            settings: RouteSettings(name: "/card/$text"),
-          ));
-        },
-      );
-      retList.add(text);
-    }
-  }
-  return retList.join("\n");
 }
