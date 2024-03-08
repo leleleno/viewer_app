@@ -99,7 +99,7 @@ Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
     data:  html,
   onLinkTap: (String? url, RenderContext context, Map<String, String> attributes, dom.Element? element) {
     if (RegExp(r"https://yugioh-wiki.net").hasMatch(url!)){
-      String newUrl = url!.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+      String newUrl = url.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
       Navigator.of(context as BuildContext).push(
         MaterialPageRoute(builder: (BuildContext context) => CardView(pageUrl: newUrl, cardName: attributes["text"]))
     );} else {
