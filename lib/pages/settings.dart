@@ -1,24 +1,35 @@
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+part 'settings.g.dart';
 
-class Settings extends StatefulWidget {
+//flutter pub run build_runner build --delete-conflicting-outputs
+@riverpod
+class IsDarkNotifier extends _$IsDarkNotifier {
+  @override
+  bool build() {
+    return false;
+  }
+
+  void updateState(bool value) {
+    state = value;
+  }
+}
+
+class Settings extends ConsumerWidget {
   const Settings({super.key});
 
   final String title = "Settings";
-
-  @override
-  State<Settings> createState() => _Settings();
-}
-
-class _Settings extends State<Settings> {
   final int _selectedIndex = 4;
 
-  bool _isDark = false;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // buildの中で状態をwatch
+    final isDark = ref.watch(isDarkNotifierProvider);
     return Scaffold(
-      appBar: myAppbar(context, widget.title),
+      appBar: myAppbar(context, title),
       drawer: myDrawer(context, _selectedIndex),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -28,11 +39,11 @@ class _Settings extends State<Settings> {
           children: <Widget>[
             SwitchListTile(
               title: const Text("Dark mode"),
-              value: _isDark,
+              value: isDark,
               onChanged: (bool value) {
-                setState(() {
-                  _isDark = value;
-                });
+                // イベントに応じて状態をread
+                final notifier = ref.read(isDarkNotifierProvider.notifier);
+                notifier.updateState(value);
               },
               subtitle: const Text("Change the status if you like dark mode."),
             ),
