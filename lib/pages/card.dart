@@ -5,8 +5,7 @@ import 'package:flutter_html_v3/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:url_launcher/url_launcher_string.dart';
 
 class CardView extends StatefulWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
@@ -104,8 +103,7 @@ Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
       Navigator.of(context as BuildContext).push(
         MaterialPageRoute(builder: (BuildContext context) => CardView(pageUrl: newUrl, cardName: attributes["text"]))
     );} else {
-      Uri uri = Uri.https(url);
-      launchUrl(uri);
+      launchUrlString(url);
     }
   }
   );
