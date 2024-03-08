@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'settings.dart';
+part of 'card.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isDarkNotifierHash() => r'8ba73cefdaeeff2144a64c305a191e924b11a9c6';
+String _$favoriteNotifierHash() => r'8731df5dae7dec22f510fbb110a2e5f1846b2d9b';
 
-/// See also [IsDarkNotifier].
-@ProviderFor(IsDarkNotifier)
-final isDarkNotifierProvider =
-    AutoDisposeNotifierProvider<IsDarkNotifier, bool>.internal(
-  IsDarkNotifier.new,
-  name: r'isDarkNotifierProvider',
+/// See also [FavoriteNotifier].
+@ProviderFor(FavoriteNotifier)
+final favoriteNotifierProvider =
+    AutoDisposeNotifierProvider<FavoriteNotifier, Map<String, bool>>.internal(
+  FavoriteNotifier.new,
+  name: r'favoriteNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$isDarkNotifierHash,
+      : _$favoriteNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$IsDarkNotifier = AutoDisposeNotifier<bool>;
+typedef _$FavoriteNotifier = AutoDisposeNotifier<Map<String, bool>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
