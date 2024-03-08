@@ -93,16 +93,19 @@ Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
     body.querySelectorAll(selector).forEach((element) {element.remove();});
   }
   // Stringにして全角スペース、ダガー、コメントアウト削除
-  String html =  body.outerHtml.replaceAll(RegExp(r"([　†]|<!--.*-->)"), "").replaceAll(RegExp(r"(<rb>|<\/rb>)"), "");
+  String html =  body.outerHtml.replaceAll(RegExp(r"([　†]|<!--.*-->)"), "").replaceAll(RegExp(r"(<rb>|<\/rb>|<div.*>|<\/div>)"), "");
   // return SelectableText(html);
   return Html(
     data:  html,
   onLinkTap: (String? url, RenderContext context, Map<String, String> attributes, dom.Element? element) {
     if (RegExp(r"https://yugioh-wiki.net").hasMatch(url!)){
       String newUrl = url.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+      // print(newUrl);
+      // print(attributes["text"]!.replaceAll(RegExp(r"(.+)$"), ""));
       Navigator.of(context as BuildContext).push(
-        MaterialPageRoute(builder: (BuildContext context) => CardView(pageUrl: newUrl, cardName: attributes["text"]))
-    );} else {
+        MaterialPageRoute(builder: (BuildContext context) => CardView(pageUrl: newUrl, cardName: attributes["text"]!.replaceAll(RegExp(r"(.+)$"), "")))
+      );
+    } else {
       launchUrlString(url);
     }
   }
