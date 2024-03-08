@@ -1,23 +1,18 @@
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class Home extends StatefulWidget {
+class Home extends ConsumerWidget {
   const Home({super.key});
 
   final String title = "HOME";
 
   @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  final int _selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: myAppbar(context, widget.title),
-      drawer: myDrawer(context, _selectedIndex),
+  Widget build(BuildContext context, WidgetRef ref) {
+    int selectedIndex = 0;
+    return CommonScaffold(
+      title: title,
+      index: selectedIndex,
       body: Column(
         children: [
           // ホームページ
@@ -35,11 +30,6 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_html_v3/flutter_html.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -9,38 +11,38 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 part 'card.g.dart';
 
+//flutter pub run build_runner build --delete-conflicting-outputs
 @riverpod
 class FavoriteNotifier extends _$FavoriteNotifier {
+  // {card name: url}
   @override
-  Map<String, bool> build() {
+  Map<String, String> build() {
     return {};
   }
 
-  void updateState(String name, bool fav) {
-    state[name] = fav;
+  void isAdded(String name, String url) {
+    state[name] = url;
+  }
+
+  void isRemoved(String name) {
+    state.remove(name);
   }
 }
 
-class CardView extends StatefulWidget {
+class CardView extends ConsumerWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
 
-  final String? pageUrl;
-  final String? cardName;
+  final String pageUrl;
+  final String cardName;
 
   @override
-  State<CardView> createState() => _CardViewState();
-}
-
-class _CardViewState extends State<CardView> {
-  final int _selectedIndex = -1;
-
-  ValueNotifier<bool> _is_favorite = ValueNotifier<bool>(false);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: myAppbar(context, widget.cardName!),
-      drawer: myDrawer(context, _selectedIndex),
+  Widget build(BuildContext context, WidgetRef ref) {
+    Map favorites = ref.watch(favoriteNotifierProvider);
+    bool isFavorite = favorites.containsKey(cardName);
+    int selectedIndex = -1;
+    return CommonScaffold(
+      title: cardName,
+      index: selectedIndex,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -48,7 +50,7 @@ class _CardViewState extends State<CardView> {
             children: [
               // ページコンテンツ、非同期処理なのでFuturebuilder
               FutureBuilder(
-                future: fetchCardData(context, widget.pageUrl),
+                future: fetchCardData(context, pageUrl),
                 builder:
                     (BuildContext context, AsyncSnapshot<Widget> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -65,18 +67,16 @@ class _CardViewState extends State<CardView> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _is_favorite.value = !_is_favorite.value;
-        },
-        tooltip: "Add to Favorite",
-        child: ValueListenableBuilder(
-            valueListenable: _is_favorite,
-            builder: (context, value, child) {
-              return Icon(
-                value ? Icons.favorite : Icons.favorite_border,
-              );
-            }),
-      ),
+          onPressed: () {
+            var notifier = ref.read(favoriteNotifierProvider.notifier);
+            isFavorite
+                ? notifier.isRemoved(cardName)
+                : notifier.isAdded(cardName, pageUrl);
+          },
+          tooltip: isFavorite ? "Remove from Favorite" : "Add to Favorite",
+          child: Icon(
+            isFavorite ? Icons.favorite : Icons.favorite_border,
+          )),
     );
   }
 }

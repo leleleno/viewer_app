@@ -22,15 +22,15 @@ class Settings extends ConsumerWidget {
   const Settings({super.key});
 
   final String title = "Settings";
-  final int _selectedIndex = 4;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const int selectedIndex = 4;
     // buildの中で状態をwatch
     final isDark = ref.watch(isDarkNotifierProvider);
-    return Scaffold(
-      appBar: myAppbar(context, title),
-      drawer: myDrawer(context, _selectedIndex),
+    return CommonScaffold(
+      title: title,
+      index: selectedIndex,
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.

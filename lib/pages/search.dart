@@ -1,9 +1,13 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/card.dart';
+import 'package:first_app/pages/history.dart';
+import 'package:first_app/pages/settings.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
+
+import 'favorite.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key, required this.inputText});
@@ -32,8 +36,72 @@ class _MySearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: myAppbar(context, "Search Page"),
-      drawer: myDrawer(context, _selectedIndex),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text("Search"),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.inversePrimary),
+              child: const Center(child: Text('Drawer Header')),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('home'),
+              onTap: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: const Text('search'),
+              selected: true,
+              onTap: () {
+                // ページ遷移とかはしないようにする
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite),
+              title: const Text('favorite'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => Favorite(),
+                  settings: const RouteSettings(name: "/favorite"),
+                ));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('history'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => History(),
+                  settings: const RouteSettings(name: "/history"),
+                ));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => Settings(),
+                  settings: const RouteSettings(name: "/settings"),
+                ));
+              },
+            ),
+          ],
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -70,9 +138,10 @@ class _MySearchState extends State<Search> {
                 },
               ),
             ),
-            if (_input != "") CardListView(
-              inputText: _input,
-            ),
+            if (_input != "")
+              CardListView(
+                inputText: _input,
+              ),
           ],
         ),
       ),
@@ -149,10 +218,11 @@ Future<List<Widget>> fetchSearchResult(
       // <a> Tagから リンクとページ名を取得
       String linkUrl = aTag.attributes['href'] ?? '';
       // urlを正規表現で置換
-      String newUrl = linkUrl.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+      String newUrl =
+          linkUrl.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
       // card name
       String text = aTag.text;
-      if (iscardTitle.hasMatch(text)){
+      if (iscardTitle.hasMatch(text)) {
         var liTile = ListTile(
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +230,10 @@ Future<List<Widget>> fetchSearchResult(
           ),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => CardView(pageUrl: newUrl, cardName: text,),
+              builder: (context) => CardView(
+                pageUrl: newUrl,
+                cardName: text,
+              ),
               settings: RouteSettings(name: "/card/$text"),
             ));
           },
