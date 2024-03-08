@@ -1,12 +1,9 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
+import 'package:http/http.dart' as http;
 
 class Search extends StatefulWidget {
   const Search({super.key, required this.inputText});
@@ -26,6 +23,7 @@ class _MySearchState extends State<Search> {
     super.initState();
     // 初期化時にWidgetの引数を渡す
     _input = widget.inputText;
+    // 検索バーにあらかじめ表示する内容
     _controller = TextEditingController(text: _input);
   }
 
@@ -90,23 +88,6 @@ class CardListView extends StatefulWidget {
   State<CardListView> createState() => _CardListViewState();
 }
 
-// class _CardListViewState extends State<CardListView> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return FutureBuilder<String>(
-//       future: fetchSample(context, widget.inputText),
-//       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const CircularProgressIndicator();
-//         } else if (snapshot.hasError) {
-//           return Text('Error: ${snapshot.error}');
-//         } else {
-//           return Text(snapshot.data!);
-//         }
-//       },
-//     );
-//   }
-// }
 class _CardListViewState extends State<CardListView> {
   @override
   Widget build(BuildContext context) {
@@ -116,11 +97,11 @@ class _CardListViewState extends State<CardListView> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+          return SelectableText('Network Error: ${snapshot.error}');
         } else {
           if (snapshot.data!.isEmpty || snapshot.data == null) {
             return const Center(
-              child: Text("There is no data!"),
+              child: Text("No search results!"),
             );
           } else {
             return Column(
@@ -136,7 +117,7 @@ class _CardListViewState extends State<CardListView> {
 Future<List<Widget>> fetchSearchResult(
     BuildContext context, String keyword) async {
   // 1. http通信に必要なデータを準備をする
-  var url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
+  Uri url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
   var data = {
     'encode_hint': 'ぷ',
     'word': keyword,
@@ -154,31 +135,38 @@ Future<List<Widget>> fetchSearchResult(
   final decodedBody =
       await CharsetConverter.decode("EUC-JP", response.bodyBytes);
   final document = parse(decodedBody);
+  // <li>Tagをすべて取得
   var lists = document.body!.getElementsByTagName('li');
+  // 空だったら終わり
   if (lists.isEmpty) {
     return retList;
   }
+  // カードかどうか判断する要の正規表現
+  final RegExp iscardTitle = RegExp(r'^《.*》$');
   for (var li in lists) {
     var aTag = li.querySelector('a');
     if (aTag != null) {
-      String url = aTag.attributes['href'] ?? '';
-      Uri uri = Uri.parse(url);
-
+      // <a> Tagから リンクとページ名を取得
+      String linkUrl = aTag.attributes['href'] ?? '';
+      String newUrl = linkUrl.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
       String text = aTag.text;
-      String newUrl =
-          'https://yugioh-wiki.net/index.php?${Uri.encodeFull(text)}';
-      var liTile = ListTile(
-        title: Column(
-          children: [Text(text), Text(newUrl)],
-        ),
-        onTap: () {
-          // Navigator.of(context).push(MaterialPageRoute(
-          //   builder: (context) => CardView(page_url: newUrl),
-          //   settings: RouteSettings(name: "/card/$text"),
-          // ));
-        },
-      );
-      retList.add(liTile);
+      // String newUrl =
+      //     'https://yugioh-wiki.net/index.php?${Uri.encodeFull(text)}';
+      // 正規表現でカード名かどうか判断
+      if (iscardTitle.hasMatch(text)){
+        var liTile = ListTile(
+          title: Column(
+            children: [Text(text), SelectableText(linkUrl), SelectableText(newUrl)],
+          ),
+          onTap: () {
+            // Navigator.of(context).push(MaterialPageRoute(
+            //   builder: (context) => CardView(page_url: newUrl),
+            //   settings: RouteSettings(name: "/card/$text"),
+            // ));
+          },
+        );
+        retList.add(liTile);
+      }
     }
   }
 
