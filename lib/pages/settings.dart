@@ -12,6 +12,7 @@ class IsDarkNotifier extends _$IsDarkNotifier {
     return false;
   }
 
+  // 状態変更関数
   void updateState(bool value) {
     state = value;
   }
