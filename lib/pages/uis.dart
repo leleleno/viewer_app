@@ -19,7 +19,6 @@ class CommonScaffold extends StatelessWidget {
     this.floatingActionButton,
   });
 
-
   @override
   Widget build(BuildContext context) {
     // キーボードショートカット設定
@@ -27,10 +26,16 @@ class CommonScaffold extends StatelessWidget {
     //   // LogicalKeyboardKey.alt,
     //   LogicalKeyboardKey.altLeft,
     // );
-    return Scaffold(
-      appBar: AppBar(
+    // Silver appbar
+    List<Widget> listSilver = [];
+    listSilver.addAll([
+      SliverAppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title),
+        // AppBarをスクロール時に画面上部に固定
+        pinned: false,
+        // AppBarが隠れるアニメーションを有効にする
+        floating: true,
         // search button add
         actions: [
           IconButton(
@@ -49,8 +54,36 @@ class CommonScaffold extends StatelessWidget {
               icon: const Icon(Icons.search))
         ],
       ),
+      SliverToBoxAdapter(
+        child: body,
+      )
+    ]);
+    return Scaffold(
+      // appBar: AppBar(
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      //   title: Text(title),
+      //   // search button add
+      //   actions: [
+      //     IconButton(
+      //         onPressed: () {
+      //           showModalBottomSheet(
+      //             context: context,
+      //             builder: (context) {
+      //               return const Padding(
+      //                 padding: EdgeInsets.all(8.0),
+      //                 child: MySearchBar(isFocus: true),
+      //               );
+      //             },
+      //             // backgroundColor: Colors.transparent,
+      //           );
+      //         },
+      //         icon: const Icon(Icons.search))
+      //   ],
+      // ),
       drawer: MyDrawer(index: index),
-      body: SingleChildScrollView(child: body),
+      body: CustomScrollView(
+        slivers: listSilver,
+      ),
       floatingActionButton: floatingActionButton,
     );
   }
