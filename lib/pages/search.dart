@@ -19,15 +19,17 @@ class SearchWordNotifier extends _$SearchWordNotifier {
     return [];
   }
   void addSearchWord(String value){
-    if (state.contains(value)){
-      state.remove(value);
-      state.add(value);
+    List<String> newList = List.from(state);
+    if (newList.contains(value)){
+      newList.remove(value);
+      newList.add(value);
     } else{
-      state.add(value);
-      if (state.length > 15){
-        state.removeAt(0);
-      }
+      newList.add(value);
     }
+    if (newList.length > 15){
+      newList.removeAt(0);
+    }
+    state = newList;
   }
 }
 
@@ -124,7 +126,7 @@ class CustomSearchBar extends ConsumerWidget {
   }
 }
 
-class CardListView extends HookConsumerWidget {
+class CardListView extends ConsumerWidget {
   const CardListView({super.key});
 
   @override

@@ -16,11 +16,11 @@ class FavoriteNotifier extends _$FavoriteNotifier {
   }
 
   void addFavorite(String name, String url) {
-    state[name] = url;
+    state = {...state, name: url};
   }
 
   void removeFavorite(String name) {
-    state.remove(name);
+    state = {...state}..remove(name);
   }
 }
 class Favorite extends ConsumerWidget {

@@ -1,6 +1,5 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/favorite.dart';
-import 'package:first_app/pages/history.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html_v3/flutter_html.dart';
@@ -18,11 +17,12 @@ class CardView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final favorites = ref.watch(favoriteNotifierProvider);
-    final histories = ref.watch(historyNotifierProvider);
-    final historyNotifier = ref.read(historyNotifierProvider.notifier);
-    historyNotifier.updateHistory(cardName, pageUrl);
+    // final histories = ref.watch(historyNotifierProvider);
+    // final historyNotifier = ref.read(historyNotifierProvider.notifier);
+    // historyNotifier.updateHistory(cardName, pageUrl);
     int selectedIndex = -1;
+    // FAB visibility
+    bool isVisible = true;
     return CommonScaffold(
       title: cardName,
       index: selectedIndex,
@@ -63,19 +63,27 @@ class CardView extends ConsumerWidget {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            var notifier = ref.read(favoriteNotifierProvider.notifier);
-            favorites.containsKey(cardName)
-                ? notifier.removeFavorite(cardName)
-                : notifier.addFavorite(cardName, pageUrl);
+      floatingActionButton: Visibility(
+        visible: isVisible,
+        child: Consumer(
+          builder: (BuildContext context, WidgetRef ref, Widget? child) {
+            final favorites = ref.watch(favoriteNotifierProvider);
+            return FloatingActionButton(
+              onPressed: () {
+                var notifier = ref.read(favoriteNotifierProvider.notifier);
+                favorites.containsKey(cardName)
+                    ? notifier.removeFavorite(cardName)
+                    : notifier.addFavorite(cardName, pageUrl);
+              },
+              tooltip: favorites.containsKey(cardName)
+                ? "Remove from Favorite"
+                : "Add to Favorite",
+              child: Icon(
+                favorites.containsKey(cardName) ? Icons.favorite : Icons.favorite_border,
+              ));
           },
-          tooltip: favorites.containsKey(cardName)
-            ? "Remove from Favorite"
-            : "Add to Favorite",
-          child: Icon(
-            favorites.containsKey(cardName) ? Icons.favorite : Icons.favorite_border,
-          )),
+        ),
+      ),
     );
   }
 }

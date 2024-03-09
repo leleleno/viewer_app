@@ -17,11 +17,11 @@ class HistoryNotifier extends _$HistoryNotifier {
   void updateHistory(String title, String url){
     if (state.containsKey(title)){
       // 一度消して再追加することで最後尾に持っていく
-      state.remove(title);
+      state = {...state}..remove(title);
     }
-    state[title]  = url;
+    state = {...state, title: url};
     if (state.length > 100){
-      state.remove(state.keys.first);
+      state = {...state}..remove(state.keys.first);
     }
   }
 }
