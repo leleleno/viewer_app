@@ -20,99 +20,104 @@ class CommonScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-        // search button add
-        actions: [
-          IconButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: MySearchBar(isFocus: true),
-                    );
-                  },
-                  // backgroundColor: Colors.transparent,
-                );
-              },
-              icon: const Icon(Icons.search))
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.inversePrimary),
-              child: const Center(child: Text('Drawer Header')),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('home'),
-              selected: index == 0,
-              onTap: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: const Text('search'),
-              selected: index == 1,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Search(inputText: ""),
-                  settings: const RouteSettings(name: "/search"),
-                ));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: const Text('favorite'),
-              selected: index == 2,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Favorite(),
-                  settings: const RouteSettings(name: "/favorite"),
-                ));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('history'),
-              selected: index == 3,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => History(),
-                  settings: const RouteSettings(name: "/history"),
-                ));
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('settings'),
-              selected: index == 4,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Settings(),
-                  settings: const RouteSettings(name: "/settings"),
-                ));
-              },
-            ),
+    return PopScope(
+      onPopInvoked: (didPop) async {
+        Navigator.of(context).pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(title),
+          // search button add
+          actions: [
+            IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: MySearchBar(isFocus: true),
+                      );
+                    },
+                    // backgroundColor: Colors.transparent,
+                  );
+                },
+                icon: const Icon(Icons.search))
           ],
         ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.inversePrimary),
+                child: const Center(child: Text('Drawer Header')),
+              ),
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('home'),
+                selected: index == 0,
+                onTap: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.search),
+                title: const Text('search'),
+                selected: index == 1,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => Search(inputText: ""),
+                    settings: const RouteSettings(name: "/search"),
+                  ));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.favorite),
+                title: const Text('favorite'),
+                selected: index == 2,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => Favorite(),
+                    settings: const RouteSettings(name: "/favorite"),
+                  ));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text('history'),
+                selected: index == 3,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => History(),
+                    settings: const RouteSettings(name: "/history"),
+                  ));
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('settings'),
+                selected: index == 4,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => Settings(),
+                    settings: const RouteSettings(name: "/settings"),
+                  ));
+                },
+              ),
+            ],
+          ),
+        ),
+        body: body,
+        floatingActionButton: floatingActionButton,
       ),
-      body: body,
-      floatingActionButton: floatingActionButton,
     );
   }
 }
@@ -232,6 +237,8 @@ class MySearchBar extends StatelessWidget {
             onPressed: () {
               // TextFieldのテキストをクリアする
               _controller.clear();
+              // modalsheet閉じる
+              Navigator.of(context).pop();
               // Trigger onSubmitted event manually
               String value = _controller.text;
               Navigator.of(context).push(MaterialPageRoute(
@@ -255,6 +262,8 @@ class MySearchBar extends StatelessWidget {
         onSubmitted: (String value) {
           // TextFieldのテキストをクリアする
           _controller.clear();
+          // modalsheet閉じる
+          Navigator.of(context).pop();
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => Search(
               inputText: value,

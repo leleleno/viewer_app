@@ -224,10 +224,7 @@ Future<List<Widget>> fetchSearchResult(
       String text = aTag.text;
       if (iscardTitle.hasMatch(text)) {
         var liTile = ListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(text)],
-          ),
+          title: Text(text),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => CardView(
@@ -238,7 +235,9 @@ Future<List<Widget>> fetchSearchResult(
             ));
           },
         );
+        const divider = Divider();
         retList.add(liTile);
+        retList.add(divider);
       }
     }
   }
