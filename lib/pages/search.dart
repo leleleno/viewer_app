@@ -1,147 +1,56 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/pages/card.dart';
-import 'package:first_app/pages/history.dart';
-import 'package:first_app/pages/settings.dart';
+import 'package:first_app/pages/favorite.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'favorite.dart';
+part 'search.g.dart';
 
-class Search extends StatefulWidget {
-  const Search({super.key, required this.inputText});
-  final String inputText;
+//flutter pub run build_runner build --delete-conflicting-outputs
+@riverpod
+class SearchWordNotifier extends _$SearchWordNotifier {
+  // {card name: url}
   @override
-  State<StatefulWidget> createState() {
-    return _MySearchState();
+  List<String> build() {
+    return [];
+  }
+  void addSearchWord(String value){
+    if (state.contains(value)){
+      state.remove(value);
+      state.add(value);
+    } else{
+      state.add(value);
+      if (state.length > 15){
+        state.removeAt(0);
+      }
+    }
   }
 }
 
-class _MySearchState extends State<Search> {
-  // 変数を宣言
-  late String _input;
-  late TextEditingController _controller;
+class Search extends ConsumerWidget {
+  const Search({super.key});
   @override
-  void initState() {
-    super.initState();
-    // 初期化時にWidgetの引数を渡す
-    _input = widget.inputText;
-    // 検索バーにあらかじめ表示する内容
-    _controller = TextEditingController(text: _input);
-  }
-
-  final int _selectedIndex = 1;
-  // TextFieldのController作成
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchWords = ref.watch(searchWordNotifierProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Search"),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.inversePrimary),
-              child: const Center(child: Text('Drawer Header')),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('home'),
-              onTap: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: const Text('search'),
-              selected: true,
-              onTap: () {
-                // ページ遷移とかはしないようにする
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: const Text('favorite'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Favorite(),
-                  settings: const RouteSettings(name: "/favorite"),
-                ));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('history'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => History(),
-                  settings: const RouteSettings(name: "/history"),
-                ));
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('settings'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Settings(),
-                  settings: const RouteSettings(name: "/settings"),
-                ));
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: const MyDrawer(index: 1),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _controller,
-                style: const TextStyle(fontSize: 18, color: Colors.black),
-                decoration: InputDecoration(
-                  prefixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      // Trigger onSubmitted event manually
-                      String value = _controller.text;
-                      setState(() {
-                        _input = value;
-                      });
-                    },
-                  ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      // TextFieldのテキストをクリアする
-                      _controller.clear();
-                    },
-                  ),
-                  hintText: "Search bar",
-                  border: const OutlineInputBorder(),
-                ),
-                onSubmitted: (value) {
-                  setState(() {
-                    _input = value;
-                  });
-                },
-              ),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CustomSearchBar(),
             ),
-            if (_input != "")
-              CardListView(
-                inputText: _input,
-              ),
+            if (searchWords[searchWords.length-1] != "")
+              const CardListView(),
           ],
         ),
       ),
@@ -149,33 +58,107 @@ class _MySearchState extends State<Search> {
   }
 }
 
-class CardListView extends StatefulWidget {
-  CardListView({super.key, required this.inputText});
-  String inputText;
+class CustomSearchBar extends ConsumerWidget {
+  const CustomSearchBar({super.key});
 
   @override
-  State<CardListView> createState() => _CardListViewState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 検索履歴
+    final searchWords = ref.watch(searchWordNotifierProvider);
+    List<Widget> listButton = [];
+    if (searchWords.isNotEmpty){
+      for (String element in searchWords) {
+        listButton.insert(0,
+          ListTile(
+            title: Text(element),
+            onTap: (){
+              final notifier = ref.read(searchWordNotifierProvider.notifier);
+              notifier.addSearchWord(element);
+            },
+          )
+        );
+      }
+    }
+    // 検索バーにあらかじめ表示する内容
+    TextEditingController controller = TextEditingController(text: searchWords[searchWords.length-1]);
+    // フォーカス判定
+    // FocusNode focus = FocusNode();
+    // bool isFocus = false;
+    return Column(
+      children: [
+        TextField(
+            controller: controller,
+            style: const TextStyle(fontSize: 18, color: Colors.black),
+            decoration: InputDecoration(
+              prefixIcon: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  // Trigger onSubmitted event manually
+                  String value = controller.text;
+                  final notifier = ref.read(searchWordNotifierProvider.notifier);
+                  notifier.addSearchWord(value);
+                },
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  // TextFieldのテキストをクリアする
+                  controller.clear();
+                },
+              ),
+              hintText: "Search bar",
+              border: const OutlineInputBorder(),
+            ),
+            onSubmitted: (value) {
+              String value = controller.text;
+              final notifier = ref.read(searchWordNotifierProvider.notifier);
+              notifier.addSearchWord(value);
+            },
+          ),
+          Visibility(
+            visible: false,
+            child: Column(children: listButton,)
+          ),
+      ],
+    );
+  }
 }
 
-class _CardListViewState extends State<CardListView> {
+class CardListView extends HookConsumerWidget {
+  const CardListView({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Widget>>(
-      future: fetchSearchResult(context, widget.inputText),
-      builder: (BuildContext context, AsyncSnapshot<List<Widget>> snapshot) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchWords = ref.watch(searchWordNotifierProvider);
+    return FutureBuilder<Map<String, String>>(
+      future: fetchSearchResult(keyword: searchWords[searchWords.length-1]),
+      builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+        // 待機中の処理
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
+          // 通信失敗時の処理
           return SelectableText('Network Error: ${snapshot.error}');
         } else {
+          // 成功時の処理
           if (snapshot.data!.isEmpty || snapshot.data == null) {
+            // 中身が空だった場合
             return const Center(
               child: Text("No search results!"),
             );
           } else {
-            return Column(
-              children: snapshot.data!,
-            );
+            // 結果を表示
+            List<Widget> retList = [];
+            // カード名か判断するための正規表現
+            final RegExp iscardTitle = RegExp(r'^《.*》$');
+            snapshot.data!.forEach((key, value) {
+              if (iscardTitle.hasMatch(key)) {
+                // カードだけretListに加える
+                Widget listTile = CardTile(title: key, url: value,);
+                retList.add(listTile);
+              }
+            },);
+            return Column(children: retList,);
           }
         }
       },
@@ -183,19 +166,61 @@ class _CardListViewState extends State<CardListView> {
   }
 }
 
-Future<List<Widget>> fetchSearchResult(
-    BuildContext context, String keyword) async {
+class CardTile extends ConsumerWidget {
+  const CardTile({super.key,
+    required this.title,
+    required this.url
+  });
+  final String title;
+  final String url;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favorites = ref.watch(favoriteNotifierProvider);
+    return Card(
+      elevation: 2,
+      child: ListTile(
+        title: Text(title),
+        subtitle: Text(url),
+        trailing: favorites.containsKey(title)
+          ? IconButton(
+            onPressed: () {
+              final notifier = ref.read(favoriteNotifierProvider.notifier);
+              notifier.removeFavorite(title);
+            },
+            icon: const Icon(Icons.favorite))
+          : IconButton(
+            onPressed: () {
+              final notifier = ref.read(favoriteNotifierProvider.notifier);
+              notifier.addFavorite(title, url);
+            },
+            icon: const Icon(Icons.favorite_border)),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => CardView(
+              pageUrl: url,
+              cardName: title,
+            ),
+            settings: RouteSettings(name: "/card/$key"),
+          ));
+        },
+      ),
+    );
+  }
+}
+
+Future<Map<String, String>> fetchSearchResult({required String keyword, String searchMode = "AND"}) async {
   // 1. http通信に必要なデータを準備をする
   Uri url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
   var data = {
     'encode_hint': 'ぷ',
     'word': keyword,
-    'type': 'AND',
+    'type': searchMode,
   };
 
   var response = await http.post(url, body: data);
   // List for return
-  List<Widget> retList = [];
+  Map<String, String> retList = {};
   // 通信の成否に合わせてReturn
   if (response.statusCode != 200) {
     return retList;
@@ -210,8 +235,6 @@ Future<List<Widget>> fetchSearchResult(
   if (lists.isEmpty) {
     return retList;
   }
-  // カードかどうか判断する要の正規表現
-  final RegExp iscardTitle = RegExp(r'^《.*》$');
   for (var li in lists) {
     var aTag = li.querySelector('a');
     if (aTag != null) {
@@ -222,25 +245,8 @@ Future<List<Widget>> fetchSearchResult(
           linkUrl.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
       // card name
       String text = aTag.text;
-      if (iscardTitle.hasMatch(text)) {
-        var liTile = ListTile(
-          title: Text(text),
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => CardView(
-                pageUrl: newUrl,
-                cardName: text,
-              ),
-              settings: RouteSettings(name: "/card/$text"),
-            ));
-          },
-        );
-        const divider = Divider();
-        retList.add(liTile);
-        retList.add(divider);
+      retList[text] = newUrl;
       }
     }
-  }
-
   return retList;
 }

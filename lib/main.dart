@@ -18,7 +18,9 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'My first app',
       theme: isDark
+          // dark mode on
           ? ThemeData.dark()
+          // dark mode off
           : ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
               useMaterial3: true,

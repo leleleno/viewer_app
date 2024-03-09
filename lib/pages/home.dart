@@ -9,26 +9,20 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    int selectedIndex = 0;
     return CommonScaffold(
       title: title,
-      index: selectedIndex,
-      body: Column(
-        children: [
-          // ホームページ
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text("Welcome to Home page!"),
-                  Text(DateTime.now().toString())
-                ],
-              ),
-            ),
+      index: 0,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text("Welcome to Home page!"),
+              Text(DateTime.now().toString()),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,33 +1,14 @@
 import 'package:charset_converter/charset_converter.dart';
+import 'package:first_app/pages/favorite.dart';
+import 'package:first_app/pages/history.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_html_v3/flutter_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-part 'card.g.dart';
-
-//flutter pub run build_runner build --delete-conflicting-outputs
-@riverpod
-class FavoriteNotifier extends _$FavoriteNotifier {
-  // {card name: url}
-  @override
-  Map<String, String> build() {
-    return {};
-  }
-
-  void isAdded(String name, String url) {
-    state[name] = url;
-  }
-
-  void isRemoved(String name) {
-    state.remove(name);
-  }
-}
 
 class CardView extends ConsumerWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
@@ -37,58 +18,76 @@ class CardView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Map favorites = ref.watch(favoriteNotifierProvider);
-    bool isFavorite = favorites.containsKey(cardName);
+    final favorites = ref.watch(favoriteNotifierProvider);
+    final histories = ref.watch(historyNotifierProvider);
+    final historyNotifier = ref.read(historyNotifierProvider.notifier);
+    historyNotifier.updateHistory(cardName, pageUrl);
     int selectedIndex = -1;
     return CommonScaffold(
       title: cardName,
       index: selectedIndex,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              // ページコンテンツ、非同期処理なのでFuturebuilder
-              FutureBuilder(
-                future: fetchCardData(context, pageUrl),
-                builder:
-                    (BuildContext context, AsyncSnapshot<Widget> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return SelectableText('Network Error: ${snapshot.error}');
-                  } else {
-                    return snapshot.data!;
-                  }
-                },
-              ),
-            ],
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FutureBuilder(
+          future: fetchCardData(context, pageUrl),
+          builder:
+              (BuildContext context, AsyncSnapshot<String> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return SelectableText('Network Error: ${snapshot.error}');
+            } else {
+              return Html(
+                data: snapshot.data,
+                onLinkTap: (String? url, RenderContext renderContext,
+                  Map<String, String> attributes, dom.Element? element) {
+                    if (url == null){
+                        print("null detected");
+                      } else if (RegExp(r"yugioh-wiki\.net").hasMatch(url!)) {
+                        String newUrl =
+                            url.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+                        String newCardName = attributes["title"]!.replaceAll(RegExp(r" +\(.+\)$"), "");
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => CardView(
+                                pageUrl: newUrl,
+                                cardName: newCardName
+                            ),
+                            settings: RouteSettings(name: '/card/$newCardName'),
+                          )
+                        );
+                      } else {
+                        launchUrlString(url);
+                      }
+                    });
+            }
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
             var notifier = ref.read(favoriteNotifierProvider.notifier);
-            isFavorite
-                ? notifier.isRemoved(cardName)
-                : notifier.isAdded(cardName, pageUrl);
+            favorites.containsKey(cardName)
+                ? notifier.removeFavorite(cardName)
+                : notifier.addFavorite(cardName, pageUrl);
           },
-          tooltip: isFavorite ? "Remove from Favorite" : "Add to Favorite",
+          tooltip: favorites.containsKey(cardName)
+            ? "Remove from Favorite"
+            : "Add to Favorite",
           child: Icon(
-            isFavorite ? Icons.favorite : Icons.favorite_border,
+            favorites.containsKey(cardName) ? Icons.favorite : Icons.favorite_border,
           )),
     );
   }
 }
 
-Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
+Future<String> fetchCardData(BuildContext context, String? pageUrl) async {
   // 取得先のURLを元にして、Uriオブジェクトを生成する。
   final response = await http.get(
     Uri.parse(pageUrl!),
   );
   // responseの成否で判定
   if (response.statusCode != 200) {
-    return const Text("Cannot get the data.");
+    return "Cannot get the data.";
   }
   // EUC-JP decode
   final decodedBody =
@@ -98,7 +97,7 @@ Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
   // htmlの内容で分岐
   final body = document.querySelector('#body');
   if (body == null) {
-    return const Text("No data in the page.");
+    return "No data in the page.";
   }
   // Clear tags
   List<String> selectors = [
@@ -116,51 +115,9 @@ Future<Widget> fetchCardData(BuildContext context, String? pageUrl) async {
   }
   // Stringにして全角スペース、ダガー、コメントアウト削除
   String html = body.outerHtml
-      .replaceAll(RegExp(r"([　†]|<!--.*-->)"), "")
-      .replaceAll(RegExp(r"(<rb>|<\/rb>|<div.*>|<\/div>)"), "");
+      .replaceAll(RegExp(r"([　†]|<!--.*-->|)"), "")
+      .replaceAll(RegExp(r"、\n"), "、")
+      .replaceAll(RegExp(r"(<rb>|<\/rb>|<div.*>|<\/div>|<hr.*>|<p><\/p>)"), "");
   // return SelectableText(html);
-  return Html(
-      data: html,
-      onLinkTap: (String? url, RenderContext context,
-          Map<String, String> attributes, dom.Element? element) {
-        if (RegExp(r"https://yugioh-wiki.net").hasMatch(url!)) {
-          String newUrl =
-              url.replaceAll(RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
-          // print(newUrl);
-          // print(attributes["text"]!.replaceAll(RegExp(r"(.+)$"), ""));
-          Navigator.of(context as BuildContext).push(MaterialPageRoute(
-              builder: (BuildContext context) => CardView(
-                  pageUrl: newUrl,
-                  cardName:
-                      attributes["text"]!.replaceAll(RegExp(r"(.+)$"), ""))));
-        } else {
-          launchUrlString(url);
-        }
-      });
-}
-
-dom.Element getContentBetweenHeaders(int index, dom.Element body) {
-  // header get
-  List<dom.Element> headers = body.querySelectorAll('h2, h3');
-
-  if (index < 0 || index >= headers.length) {
-    throw ArgumentError('index is out of range');
-  }
-
-  dom.Element start = headers[index];
-  dom.Element? end = index + 1 < headers.length ? headers[index + 1] : null;
-  List<dom.Element> retList = [start];
-  dom.Element? next = start.nextElementSibling;
-
-  while (next != end && next != null) {
-    retList.add(next);
-    next = next.nextElementSibling;
-  }
-  // Join all elements in retList into one string
-  String allElements = retList.map((e) => e.outerHtml).join('');
-
-  // Create a new Element with allElements as its innerHtml
-  dom.Element result = dom.Element.tag('div');
-  result.innerHtml = allElements;
-  return result;
+  return html;
 }

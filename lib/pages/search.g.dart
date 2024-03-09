@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'favorite.dart';
+part of 'search.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$favoriteNotifierHash() => r'0ee7e7940f9eebe038453c60a1e0b4d6069256b2';
+String _$searchWordNotifierHash() =>
+    r'2356cb08e2a7d11208e6200bcd3685765aa4f9f1';
 
-/// See also [FavoriteNotifier].
-@ProviderFor(FavoriteNotifier)
-final favoriteNotifierProvider =
-    AutoDisposeNotifierProvider<FavoriteNotifier, Map<String, String>>.internal(
-  FavoriteNotifier.new,
-  name: r'favoriteNotifierProvider',
+/// See also [SearchWordNotifier].
+@ProviderFor(SearchWordNotifier)
+final searchWordNotifierProvider =
+    AutoDisposeNotifierProvider<SearchWordNotifier, List<String>>.internal(
+  SearchWordNotifier.new,
+  name: r'searchWordNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$favoriteNotifierHash,
+      : _$searchWordNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$FavoriteNotifier = AutoDisposeNotifier<Map<String, String>>;
+typedef _$SearchWordNotifier = AutoDisposeNotifier<List<String>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
