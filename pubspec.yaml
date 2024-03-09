@@ -46,6 +46,7 @@ dependencies:
   riverpod_generator: ^2.3.11
   hooks_riverpod: ^2.4.10
   dropdown_search: ^5.0.6
+  flutter_hooks: ^0.20.5
 
 dev_dependencies:
   flutter_test:
