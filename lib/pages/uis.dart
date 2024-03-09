@@ -113,19 +113,34 @@ class MyDrawer extends StatelessWidget {
             title: const Text('ホーム'),
             selected: index == 0,
             onTap: () {
+              // Drawer閉じる
+              Navigator.of(context).pop;
+              // Homeに戻る
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('検索'),
-            selected: index == 1,
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const Search(),
-                settings: const RouteSettings(name: "/search"),
-              ));
+          Consumer(
+            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              return ListTile(
+                leading: const Icon(Icons.search),
+                title: const Text('検索'),
+                selected: index == 1,
+                onTap: () {
+                  // ドロワー閉じる
+                  Navigator.pop(context);
+                  // もし検索画面じゃなかったら
+                  if (index != 1) {
+                    // 検索ワードリセット
+                    // final notifier =
+                    //     ref.read(searchWordNotifierProvider.notifier);
+                    // notifier.addSearchWord("");
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const Search(),
+                      settings: const RouteSettings(name: "/search"),
+                    ));
+                  }
+                },
+              );
             },
           ),
           ListTile(
@@ -134,10 +149,12 @@ class MyDrawer extends StatelessWidget {
             selected: index == 2,
             onTap: () {
               Navigator.pop(context);
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const Favorite(),
-                settings: const RouteSettings(name: "/favorite"),
-              ));
+              if (index != 2) {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const Favorite(),
+                  settings: const RouteSettings(name: "/favorite"),
+                ));
+              }
             },
           ),
           ListTile(
@@ -146,10 +163,12 @@ class MyDrawer extends StatelessWidget {
             selected: index == 3,
             onTap: () {
               Navigator.pop(context);
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const History(),
-                settings: const RouteSettings(name: "/history"),
-              ));
+              if (index != 3) {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const History(),
+                  settings: const RouteSettings(name: "/history"),
+                ));
+              }
             },
           ),
           const Divider(),
@@ -159,10 +178,12 @@ class MyDrawer extends StatelessWidget {
             selected: index == 4,
             onTap: () {
               Navigator.pop(context);
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const Settings(),
-                settings: const RouteSettings(name: "/settings"),
-              ));
+              if (index != 4) {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const Settings(),
+                  settings: const RouteSettings(name: "/settings"),
+                ));
+              }
             },
           ),
         ],
