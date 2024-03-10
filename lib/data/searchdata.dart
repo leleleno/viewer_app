@@ -34,7 +34,7 @@ class SearchDataBase {
 
   // load the data from database
   void loadData() {
-    searchwords = _myBox.get('SEARCH') ?? {};
+    searchwords = _myBox.get('SEARCH') ?? [];
   }
 
   // new histroy adding
