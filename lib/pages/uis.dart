@@ -6,7 +6,7 @@ import 'package:first_app/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class CommonScaffold extends StatelessWidget {
+class CommonScaffold extends StatefulWidget {
   final String title;
   final int index;
   final Widget body;
@@ -21,71 +21,52 @@ class CommonScaffold extends StatelessWidget {
   });
 
   @override
+  State<CommonScaffold> createState() => _CommonScaffoldState();
+}
+
+class _CommonScaffoldState extends State<CommonScaffold> {
+  late bool isVisible;
+  @override
+  void initState() {
+    super.initState();
+    isVisible = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // キーボードショートカット設定
-    // final popKeySet = LogicalKeySet(
-    //   // LogicalKeyboardKey.alt,
-    //   LogicalKeyboardKey.altLeft,
-    // );
-    // Silver appbar
-    List<Widget> listSilver = [];
-    listSilver.addAll([
-      SliverAppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-        // AppBarをスクロール時に画面上部に固定
-        pinned: false,
-        // AppBarが隠れるアニメーションを有効にする
-        floating: true,
-        // search button add
-        actions: [
-          IconButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: MySearchBar(isFocus: true),
-                    );
-                  },
-                  // backgroundColor: Colors.transparent,
-                );
-              },
-              icon: const Icon(Icons.search))
+    return Scaffold(
+      drawer: MyDrawer(index: widget.index),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: Text(widget.title),
+            pinned: false,
+            floating: true,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    isVisible = !isVisible;
+                  });
+                },
+                icon: const Icon(Icons.search),
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Visibility(
+                visible: isVisible,
+                child: const MySearchBar(
+                  isFocus: true,
+                )),
+          ),
+          SliverToBoxAdapter(
+            child: widget.body,
+          ),
         ],
       ),
-      SliverToBoxAdapter(
-        child: body,
-      )
-    ]);
-    return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      //   title: Text(title),
-      //   // search button add
-      //   actions: [
-      //     IconButton(
-      //         onPressed: () {
-      //           showModalBottomSheet(
-      //             context: context,
-      //             builder: (context) {
-      //               return const Padding(
-      //                 padding: EdgeInsets.all(8.0),
-      //                 child: MySearchBar(isFocus: true),
-      //               );
-      //             },
-      //             // backgroundColor: Colors.transparent,
-      //           );
-      //         },
-      //         icon: const Icon(Icons.search))
-      //   ],
-      // ),
-      drawer: MyDrawer(index: index),
-      body: CustomScrollView(
-        slivers: listSilver,
-      ),
-      floatingActionButton: floatingActionButton,
+      floatingActionButton: widget.floatingActionButton,
     );
   }
 }
