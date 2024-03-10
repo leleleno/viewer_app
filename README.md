@@ -1,6 +1,10 @@
-# first_app
+# 遊戯王wikiビューワーアプリ
 
-A new Flutter project.
+Flutterによる遊戯王wikiビューワーアプリ開発
+現在リリース済み：
+- [x] Android
+- [ ] iOS
+- [ ] Windows
 
 ## Getting Started
 
