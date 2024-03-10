@@ -33,7 +33,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class History extends HookConsumerWidget {
   const History({super.key});
-  final String title = "History";
+  final String title = "履歴";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,7 +46,7 @@ class History extends HookConsumerWidget {
     } else {
       bodyList.add(const Padding(
         padding: EdgeInsets.all(8.0),
-        child: Center(child: Text("There is no history data.")),
+        child: Center(child: Text("履歴はありません")),
       ));
     }
     return CommonScaffold(
@@ -77,6 +77,7 @@ class HistoryCardTile extends StatelessWidget {
             children: [
               SlidableAction(
                 onPressed: (BuildContext context) {
+                  // 履歴から削除
                   final notifier = ref.read(historyNotifierProvider.notifier);
                   notifier.removeData(title);
                 },
@@ -85,38 +86,37 @@ class HistoryCardTile extends StatelessWidget {
               )
             ],
           ),
-          child: Card(
-            elevation: 2,
-            child: ListTile(
-              title: Text(title),
-              subtitle: Text(url),
-              trailing: favorites.containsKey(title)
-                  ? IconButton(
-                      onPressed: () {
-                        final notifier =
-                            ref.read(favoriteNotifierProvider.notifier);
-                        notifier.removeData(title);
-                      },
-                      icon: const Icon(Icons.favorite))
-                  : IconButton(
-                      onPressed: () {
-                        final notifier =
-                            ref.read(favoriteNotifierProvider.notifier);
-                        notifier.addData(title, url);
-                      },
-                      icon: const Icon(Icons.favorite_border)),
-              onTap: () {
-                // 履歴を更新
-                final notifier = ref.read(historyNotifierProvider.notifier);
-                notifier.addData(title, url);
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => CardView(
-                    pageUrl: url,
-                    cardName: title,
-                  ),
-                  settings: RouteSettings(name: "/card/$key"),
-                ));
-              },
+          child: Padding(
+            padding: const EdgeInsets.all(1.0),
+            child: Card(
+              elevation: 2,
+              child: ListTile(
+                title: Text(title),
+                trailing: favorites.containsKey(title)
+                    ? IconButton(
+                        onPressed: () {
+                          final notifier =
+                              ref.read(favoriteNotifierProvider.notifier);
+                          notifier.removeData(title);
+                        },
+                        icon: const Icon(Icons.favorite))
+                    : IconButton(
+                        onPressed: () {
+                          final notifier =
+                              ref.read(favoriteNotifierProvider.notifier);
+                          notifier.addData(title, url);
+                        },
+                        icon: const Icon(Icons.favorite_border)),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => CardView(
+                      pageUrl: url,
+                      cardName: title,
+                    ),
+                    settings: RouteSettings(name: "/card/$key"),
+                  ));
+                },
+              ),
             ),
           ),
         );

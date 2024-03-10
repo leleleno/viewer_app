@@ -11,7 +11,7 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher_string.dart';
 
-class CardView extends HookWidget {
+class CardView extends StatelessWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
 
   final String pageUrl;
@@ -37,8 +37,11 @@ class CardView extends HookWidget {
             } else {
               return Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                  // history controll
-                  final histories = ref.watch(historyNotifierProvider);
+                  Future.delayed(Duration.zero, () {
+                    // 履歴に追加
+                    final notifier = ref.read(historyNotifierProvider.notifier);
+                    notifier.addData(cardName, pageUrl);
+                  });
                   return Html(
                       data: snapshot.data,
                       onLinkTap: (String? url,
@@ -46,16 +49,11 @@ class CardView extends HookWidget {
                           Map<String, String> attributes,
                           dom.Element? element) {
                         if (url == null) {
-                          print("null detected");
-                        } else if (RegExp(r"yugioh-wiki\.net").hasMatch(url!)) {
+                        } else if (RegExp(r"yugioh-wiki\.net").hasMatch(url)) {
                           String newUrl = url.replaceAll(
                               RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
                           String newCardName = attributes["title"]!
                               .replaceAll(RegExp(r" +\(.+\)$"), "");
-                          // 履歴に追加
-                          final notifier =
-                              ref.read(historyNotifierProvider.notifier);
-                          notifier.addData(newCardName, newUrl);
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) => CardView(
                                 pageUrl: newUrl, cardName: newCardName),
@@ -85,10 +83,13 @@ class CardView extends HookWidget {
               tooltip: favorites.containsKey(cardName)
                   ? "Remove from Favorite"
                   : "Add to Favorite",
+              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.3),
+              shape: CircleBorder(),
               child: Icon(
                 favorites.containsKey(cardName)
                     ? Icons.favorite
                     : Icons.favorite_border,
+                color: Color.fromARGB(255, 252, 158, 189),
               ));
         },
       ),

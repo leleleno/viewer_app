@@ -20,7 +20,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class Settings extends ConsumerWidget {
   const Settings({super.key});
 
-  final String title = "Settings";
+  final String title = "設定";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,13 +38,13 @@ class Settings extends ConsumerWidget {
         children: <Widget>[
           Card(
             child: SwitchListTile(
-              title: const Text("Dark mode"),
+              title: const Text("ダークモード"),
               value: settings['isDark'],
               onChanged: (bool value) {
                 final notifier = ref.read(settingsNotifierProvider.notifier);
                 notifier.changeData('isDark', value);
               },
-              subtitle: const Text("Change the status if you like dark mode."),
+              subtitle: const Text("この設定いる？"),
             ),
           ),
         ],

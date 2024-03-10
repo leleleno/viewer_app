@@ -11,44 +11,80 @@ import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
 
 // 行ったり来たりしても状態を保持してほしいならHook
-class Search extends HookConsumerWidget {
+class Search extends StatelessWidget {
   const Search({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final searchWords = ref.watch(searchNotifierProvider);
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Search"),
+        title: const Text("検索"),
       ),
       drawer: const MyDrawer(index: 1),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CustomSearchBar(),
-            ),
-            if (searchWords.isEmpty)
-              const Center(
-                child: Text(
-                  "Wow. Such an Empty!",
-                  style: TextStyle(fontSize: 20),
+      body: Consumer(
+        builder: (BuildContext context, WidgetRef ref, Widget? child) {
+          final searchWords = ref.watch(searchNotifierProvider);
+          return Stack(
+            children: [
+              if (searchWords.isEmpty)
+                const SizedBox() // Center ウィジェットを SizedBox に置き換えます
+              else
+                Positioned.fill(
+                    top: MediaQuery.of(context).padding.top +
+                        kToolbarHeight +
+                        32.0,
+                    left: 10,
+                    right: 10,
+                    child: SingleChildScrollView(
+                        child: CardListView(input: searchWords.last))),
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0, // Stack の右端まで広げるために right: 0 を追加します
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CustomSearchBar(),
                 ),
-              )
-            else
-              CardListView(input: searchWords.last),
-          ],
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class CustomSearchBar extends HookWidget {
+class CustomSearchBar extends StatefulWidget {
   const CustomSearchBar({super.key});
+
+  @override
+  State<CustomSearchBar> createState() => _CustomSearchBarState();
+}
+
+class _CustomSearchBarState extends State<CustomSearchBar> {
+  late FocusNode _focusNode;
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  // フォーカスの変更を処理するハンドラ
+  void _handleFocusChange() {
+    setState(() {
+      _isFocused = _focusNode.hasFocus;
+    });
+  } // TextFieldのfocusNodeをdispose
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // disposeを実装
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,29 +92,14 @@ class CustomSearchBar extends HookWidget {
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         // 検索ワードを監視
         final searchWords = ref.watch(searchNotifierProvider);
-        List<Widget> listButton = [];
-        if (searchWords.isNotEmpty) {
-          for (String element in searchWords) {
-            listButton.insert(
-              0,
-              ListTile(
-                title: Text(element),
-                onTap: () {
-                  final notifier = ref.read(searchNotifierProvider.notifier);
-                  notifier.addData(element);
-                },
-              ),
-            );
-          }
-        }
-
+        // 検索バーに最初に入れるワード
         TextEditingController controller = TextEditingController(
           text: searchWords.isNotEmpty ? searchWords.last : "",
         );
-
         return Column(
           children: [
             TextField(
+              focusNode: _focusNode,
               controller: controller,
               style: const TextStyle(
                 fontSize: 18,
@@ -107,11 +128,32 @@ class CustomSearchBar extends HookWidget {
               },
             ),
             Visibility(
-              visible: false,
-              child: Column(
-                children: listButton,
-              ),
-            ),
+                visible: _isFocused,
+                child: ListView.builder(
+                  // Columnの中に入れるときのエラー回避
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(), //追加
+                  // ListView.builder内のindexingエラーを修正
+                  itemCount: searchWords.length,
+                  itemBuilder: (BuildContext context, index) {
+                    var item = searchWords[index]; // indexを正しく指定
+                    // 空のアイテムをスキップ
+                    if (item != "") {
+                      return ListTile(
+                        title: Text(item),
+                        onTap: () {
+                          setState(() {
+                            controller.value =
+                                TextEditingValue(text: item); // TextFieldの値を更新
+                            _focusNode.unfocus(); // リストアイテムをタップしたらフォーカスを外す
+                          });
+                        },
+                      );
+                    } else {
+                      return const SizedBox.shrink(); // 空のアイテムの場合は何も表示しない
+                    }
+                  },
+                )),
           ],
         );
       },
@@ -180,7 +222,6 @@ class CardTile extends StatelessWidget {
           elevation: 2,
           child: ListTile(
             title: Text(title),
-            subtitle: Text(url),
             trailing: favorites.containsKey(title)
                 // もしお気に入りなら
                 ? IconButton(
@@ -199,9 +240,6 @@ class CardTile extends StatelessWidget {
                     },
                     icon: const Icon(Icons.favorite_border)),
             onTap: () {
-              // 履歴に追加
-              final notifier = ref.read(historyNotifierProvider.notifier);
-              notifier.addData(title, url);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => CardView(
                   pageUrl: url,
@@ -210,6 +248,7 @@ class CardTile extends StatelessWidget {
                 settings: RouteSettings(name: "/card/$key"),
               ));
             },
+            onLongPress: () {},
           ),
         );
       },

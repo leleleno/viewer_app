@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class Favorite extends ConsumerWidget {
   const Favorite({super.key});
 
-  final String title = "Favorite";
+  final String title = "お気に入り";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,7 +20,7 @@ class Favorite extends ConsumerWidget {
     } else {
       bodyList.add(const Padding(
         padding: EdgeInsets.all(8.0),
-        child: Center(child: Text("There is no favorite data.")),
+        child: Center(child: Text("お気に入りはありません")),
       ));
     }
     return CommonScaffold(
