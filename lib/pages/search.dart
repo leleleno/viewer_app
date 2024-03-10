@@ -1,38 +1,14 @@
 import 'package:charset_converter/charset_converter.dart';
+import 'package:first_app/data/favoritedata.dart';
+import 'package:first_app/data/historydata.dart';
+import 'package:first_app/data/searchdata.dart';
 import 'package:first_app/pages/card.dart';
-import 'package:first_app/pages/favorite.dart';
-import 'package:first_app/pages/history.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'search.g.dart';
-
-//flutter pub run build_runner build --delete-conflicting-outputs
-@riverpod
-class SearchWordNotifier extends _$SearchWordNotifier {
-  // {card name: url}
-  @override
-  List<String> build() {
-    return [];
-  }
-
-  void addSearchWord(String value) {
-    List<String> newList = List.from(state);
-    if (newList.contains(value)) {
-      newList.remove(value);
-    }
-    newList.add(value);
-    if (newList.length > 15) {
-      newList.removeAt(0);
-    }
-    state = newList;
-  }
-}
 
 // 行ったり来たりしても状態を保持してほしいならHook
 class Search extends HookConsumerWidget {
@@ -40,7 +16,7 @@ class Search extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchWords = ref.watch(searchWordNotifierProvider);
+    final searchWords = ref.watch(searchNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -79,7 +55,7 @@ class CustomSearchBar extends HookWidget {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         // 検索ワードを監視
-        final searchWords = ref.watch(searchWordNotifierProvider);
+        final searchWords = ref.watch(searchNotifierProvider);
         List<Widget> listButton = [];
         if (searchWords.isNotEmpty) {
           for (String element in searchWords) {
@@ -88,9 +64,8 @@ class CustomSearchBar extends HookWidget {
               ListTile(
                 title: Text(element),
                 onTap: () {
-                  final notifier =
-                      ref.read(searchWordNotifierProvider.notifier);
-                  notifier.addSearchWord(element);
+                  final notifier = ref.read(searchNotifierProvider.notifier);
+                  notifier.addData(element);
                 },
               ),
             );
@@ -113,9 +88,8 @@ class CustomSearchBar extends HookWidget {
                   icon: const Icon(Icons.search),
                   onPressed: () {
                     String value = controller.text;
-                    final notifier =
-                        ref.read(searchWordNotifierProvider.notifier);
-                    notifier.addSearchWord(value);
+                    final notifier = ref.read(searchNotifierProvider.notifier);
+                    notifier.addData(value);
                   },
                 ),
                 suffixIcon: IconButton(
@@ -128,8 +102,8 @@ class CustomSearchBar extends HookWidget {
                 border: const OutlineInputBorder(),
               ),
               onSubmitted: (value) {
-                final notifier = ref.read(searchWordNotifierProvider.notifier);
-                notifier.addSearchWord(value);
+                final notifier = ref.read(searchNotifierProvider.notifier);
+                notifier.addData(value);
               },
             ),
             Visibility(
@@ -189,7 +163,7 @@ class CardListView extends HookWidget {
   }
 }
 
-class CardTile extends HookWidget {
+class CardTile extends StatelessWidget {
   const CardTile({super.key, required this.title, required this.url});
 
   final String title;
@@ -199,33 +173,35 @@ class CardTile extends HookWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        // リンクを開いた時点で履歴を管理できるよう監視
-        // ignore: unused_local_variable
-        final histories = ref.watch(historyNotifierProvider);
+        // お気に入り、履歴を監視
         final favorites = ref.watch(favoriteNotifierProvider);
+        final histories = ref.watch(historyNotifierProvider);
         return Card(
           elevation: 2,
           child: ListTile(
             title: Text(title),
             subtitle: Text(url),
             trailing: favorites.containsKey(title)
+                // もしお気に入りなら
                 ? IconButton(
                     onPressed: () {
                       final notifier =
                           ref.read(favoriteNotifierProvider.notifier);
-                      notifier.removeFavorite(title);
+                      notifier.removeData(title);
                     },
                     icon: const Icon(Icons.favorite))
+                // もしお気に入りじゃなかったら
                 : IconButton(
                     onPressed: () {
                       final notifier =
                           ref.read(favoriteNotifierProvider.notifier);
-                      notifier.addFavorite(title, url);
+                      notifier.addData(title, url);
                     },
                     icon: const Icon(Icons.favorite_border)),
             onTap: () {
+              // 履歴に追加
               final notifier = ref.read(historyNotifierProvider.notifier);
-              notifier.updateHistory(title, url);
+              notifier.addData(title, url);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => CardView(
                   pageUrl: url,

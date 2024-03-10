@@ -1,28 +1,55 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class HistroyData {
-  late Box<Map<String, String>> _historyBox;
+part 'historydata.g.dart';
 
-  // Constructor
-  HistroyData() {
-    _init();
+@riverpod
+class HistoryNotifier extends _$HistoryNotifier {
+  final _myBox = Hive.box('mybox');
+  HistoryDataBase db = HistoryDataBase();
+  @override
+  Map build() {
+    db.loadData();
+    db.updateData();
+    return {...db.histories};
   }
 
-  // ボックスの初期化
-  Future<void> _init() async {
-    // ボックスを開く
-    _historyBox = await Hive.openBox<Map<String, String>>('history');
+  void addData(key, value) {
+    db.addData(key, value);
+    db.updateData();
+    state = {...db.histories};
   }
 
-  // データの読み込み
-  Future<Map<String, String>> loadData() async {
-    await _init(); // ボックスがまだ開かれていない場合は開く
-    return _historyBox.get('history') ?? {};
+  void removeData(key) {
+    db.histories.remove(key);
+    db.updateData();
+    state = {...db.histories};
+  }
+}
+
+class HistoryDataBase {
+  Map histories = {};
+  // ref the box
+  final _myBox = Hive.box('mybox');
+
+  // load the data from database
+  void loadData() {
+    histories = _myBox.get('HISTORY') ?? {};
   }
 
-  // データの更新
-  Future<void> updateData(Map<String, String> newData) async {
-    await _init(); // ボックスがまだ開かれていない場合は開く
-    await _historyBox.put('history', newData);
+  // new histroy adding
+  void addData(key, value) {
+    if (histories.containsKey(key)) {
+      histories.remove(key);
+    }
+    histories[key] = value;
+    if (histories.length > 150) {
+      histories.remove(histories.keys.first);
+    }
+  }
+
+  // data updated
+  void updateData() {
+    _myBox.put('HISTORY', histories);
   }
 }

@@ -1,23 +1,21 @@
+import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'settings.g.dart';
 
 //flutter pub run build_runner build --delete-conflicting-outputs
-@riverpod
-class IsDarkNotifier extends _$IsDarkNotifier {
-  @override
-  bool build() {
-    return false;
-  }
+// @riverpod
+// class IsDarkNotifier extends _$IsDarkNotifier {
+//   @override
+//   bool build() {
+//     return false;
+//   }
 
-  // 状態変更関数
-  void updateState(bool value) {
-    state = value;
-  }
-}
+//   // 状態変更関数
+//   void updateState(bool value) {
+//     state = value;
+//   }
+// }
 
 class Settings extends ConsumerWidget {
   const Settings({super.key});
@@ -26,9 +24,13 @@ class Settings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // // ref box
+    // final _myBox = Hive.box('mybox');
+    // // settings 開く
+    // SettingsDataBase db = SettingsDataBase();
+    // db.loadData();
+    final settings = ref.watch(settingsNotifierProvider);
     const int selectedIndex = 4;
-    // buildの中で状態をwatch
-    final isDark = ref.watch(isDarkNotifierProvider);
     return CommonScaffold(
       title: title,
       index: selectedIndex,
@@ -37,11 +39,10 @@ class Settings extends ConsumerWidget {
           Card(
             child: SwitchListTile(
               title: const Text("Dark mode"),
-              value: isDark,
+              value: settings['isDark'],
               onChanged: (bool value) {
-                // イベントに応じて状態をread
-                final notifier = ref.read(isDarkNotifierProvider.notifier);
-                notifier.updateState(value);
+                final notifier = ref.read(settingsNotifierProvider.notifier);
+                notifier.changeData('isDark', value);
               },
               subtitle: const Text("Change the status if you like dark mode."),
             ),

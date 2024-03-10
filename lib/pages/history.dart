@@ -1,40 +1,37 @@
+import 'package:first_app/data/favoritedata.dart';
+import 'package:first_app/data/historydata.dart';
 import 'package:first_app/pages/card.dart';
-import 'package:first_app/pages/favorite.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'history.g.dart';
 
 //flutter pub run build_runner build --delete-conflicting-outputs
-@riverpod
-class HistoryNotifier extends _$HistoryNotifier {
-  // {card name: url}
-  @override
-  Map<String, String> build() {
-    return {};
-  }
+// @riverpod
+// class HistoryNotifier extends _$HistoryNotifier {
+//   // {card name: url}
+//   @override
+//   Map<String, String> build() {
+//     return {};
+//   }
 
-  void updateHistory(String title, String url) {
-    if (state.containsKey(title)) {
-      // 一度消して再追加することで最後尾に持っていく
-      state = {...state}..remove(title);
-    }
-    state = {...state, title: url};
-    if (state.length > 100) {
-      state = {...state}..remove(state.keys.first);
-    }
-  }
+//   void updateHistory(String title, String url) {
+//     if (state.containsKey(title)) {
+//       // 一度消して再追加することで最後尾に持っていく
+//       state = {...state}..remove(title);
+//     }
+//     state = {...state, title: url};
+//     if (state.length > 100) {
+//       state = {...state}..remove(state.keys.first);
+//     }
+//   }
 
-  void deleteHistory(String title) {
-    state = {...state}..remove(title);
-  }
-}
+//   void deleteHistory(String title) {
+//     state = {...state}..remove(title);
+//   }
+// }
 
-class History extends ConsumerWidget {
+class History extends HookConsumerWidget {
   const History({super.key});
   final String title = "History";
 
@@ -60,7 +57,7 @@ class History extends ConsumerWidget {
   }
 }
 
-class HistoryCardTile extends HookWidget {
+class HistoryCardTile extends StatelessWidget {
   const HistoryCardTile({super.key, required this.title, required this.url});
 
   final String title;
@@ -70,9 +67,9 @@ class HistoryCardTile extends HookWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        // リンクを開いた時点で履歴を管理できるよう監視
-        // ignore: unused_local_variable
+        // history control
         final histories = ref.watch(historyNotifierProvider);
+        // favorite control
         final favorites = ref.watch(favoriteNotifierProvider);
         return Slidable(
           endActionPane: ActionPane(
@@ -80,8 +77,8 @@ class HistoryCardTile extends HookWidget {
             children: [
               SlidableAction(
                 onPressed: (BuildContext context) {
-                  final notifier = ref.watch(historyNotifierProvider.notifier);
-                  notifier.deleteHistory(title);
+                  final notifier = ref.read(historyNotifierProvider.notifier);
+                  notifier.removeData(title);
                 },
                 icon: Icons.delete,
                 label: "Delete",
@@ -98,19 +95,20 @@ class HistoryCardTile extends HookWidget {
                       onPressed: () {
                         final notifier =
                             ref.read(favoriteNotifierProvider.notifier);
-                        notifier.removeFavorite(title);
+                        notifier.removeData(title);
                       },
                       icon: const Icon(Icons.favorite))
                   : IconButton(
                       onPressed: () {
                         final notifier =
                             ref.read(favoriteNotifierProvider.notifier);
-                        notifier.addFavorite(title, url);
+                        notifier.addData(title, url);
                       },
                       icon: const Icon(Icons.favorite_border)),
               onTap: () {
+                // 履歴を更新
                 final notifier = ref.read(historyNotifierProvider.notifier);
-                notifier.updateHistory(title, url);
+                notifier.addData(title, url);
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => CardView(
                     pageUrl: url,

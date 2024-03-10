@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'favorite.dart';
+part of 'settingsdata.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$favoriteNotifierHash() => r'3b5c255d0f91c21e2d2eb50e6b71443982e3df5b';
+String _$settingsNotifierHash() => r'62a035ec7a198a1dbd548a6ee4e4cb9777dc2c27';
 
-/// See also [FavoriteNotifier].
-@ProviderFor(FavoriteNotifier)
-final favoriteNotifierProvider =
-    AutoDisposeNotifierProvider<FavoriteNotifier, Map<String, String>>.internal(
-  FavoriteNotifier.new,
-  name: r'favoriteNotifierProvider',
+/// See also [SettingsNotifier].
+@ProviderFor(SettingsNotifier)
+final settingsNotifierProvider =
+    AutoDisposeNotifierProvider<SettingsNotifier, Map>.internal(
+  SettingsNotifier.new,
+  name: r'settingsNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$favoriteNotifierHash,
+      : _$settingsNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$FavoriteNotifier = AutoDisposeNotifier<Map<String, String>>;
+typedef _$SettingsNotifier = AutoDisposeNotifier<Map>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

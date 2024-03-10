@@ -1,3 +1,4 @@
+import 'package:first_app/data/searchdata.dart';
 import 'package:first_app/pages/favorite.dart';
 import 'package:first_app/pages/history.dart';
 import 'package:first_app/pages/search.dart';
@@ -200,7 +201,7 @@ class MySearchBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController controller = TextEditingController();
     // 検索ワードを常に監視
-    final searchWords = ref.watch(searchWordNotifierProvider);
+    final searchWords = ref.watch(searchNotifierProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(
@@ -220,8 +221,8 @@ class MySearchBar extends ConsumerWidget {
               Navigator.of(context).pop();
               // Trigger onSubmitted event manually
               String value = controller.text;
-              final notifier = ref.read(searchWordNotifierProvider.notifier);
-              notifier.addSearchWord(value);
+              final notifier = ref.read(searchNotifierProvider.notifier);
+              notifier.addData(value);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => const Search(),
                 settings: RouteSettings(name: "/search/$value"),
@@ -242,8 +243,8 @@ class MySearchBar extends ConsumerWidget {
           // TextFieldのテキストをクリアする
           controller.clear();
           // modalsheet閉じる
-          final notifier = ref.read(searchWordNotifierProvider.notifier);
-          notifier.addSearchWord(value);
+          final notifier = ref.read(searchNotifierProvider.notifier);
+          notifier.addData(value);
           Navigator.of(context).pop();
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const Search(),

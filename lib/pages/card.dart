@@ -1,8 +1,9 @@
 import 'package:charset_converter/charset_converter.dart';
-import 'package:first_app/pages/favorite.dart';
-import 'package:first_app/pages/history.dart';
+import 'package:first_app/data/favoritedata.dart';
+import 'package:first_app/data/historydata.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_html_v3/flutter_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart' as dom;
@@ -10,17 +11,14 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher_string.dart';
 
-class CardView extends HookConsumerWidget {
+class CardView extends HookWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
 
   final String pageUrl;
   final String cardName;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // ページを開いた段階で履歴を更新できるよう監視
-    // ignore: unused_local_variable
-    final histories = ref.watch(historyNotifierProvider);
+  Widget build(BuildContext context) {
     int selectedIndex = -1;
     // FAB visibility
     // bool isVisible = true;
@@ -37,43 +35,52 @@ class CardView extends HookConsumerWidget {
             } else if (snapshot.hasError) {
               return SelectableText('Network Error: ${snapshot.error}');
             } else {
-              return Html(
-                  data: snapshot.data,
-                  onLinkTap: (String? url, RenderContext renderContext,
-                      Map<String, String> attributes, dom.Element? element) {
-                    if (url == null) {
-                      print("null detected");
-                    } else if (RegExp(r"yugioh-wiki\.net").hasMatch(url!)) {
-                      String newUrl = url.replaceAll(
-                          RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
-                      String newCardName = attributes["title"]!
-                          .replaceAll(RegExp(r" +\(.+\)$"), "");
-                      final notifier =
-                          ref.read(historyNotifierProvider.notifier);
-                      // 履歴に追加
-                      notifier.updateHistory(newCardName, newUrl);
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            CardView(pageUrl: newUrl, cardName: newCardName),
-                        settings: RouteSettings(name: '/card/$newCardName'),
-                      ));
-                    } else {
-                      launchUrlString(url);
-                    }
-                  });
+              return Consumer(
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                  // history controll
+                  final histories = ref.watch(historyNotifierProvider);
+                  return Html(
+                      data: snapshot.data,
+                      onLinkTap: (String? url,
+                          RenderContext renderContext,
+                          Map<String, String> attributes,
+                          dom.Element? element) {
+                        if (url == null) {
+                          print("null detected");
+                        } else if (RegExp(r"yugioh-wiki\.net").hasMatch(url!)) {
+                          String newUrl = url.replaceAll(
+                              RegExp(r"(:443|cmd=read&page=|&word=.*$)"), "");
+                          String newCardName = attributes["title"]!
+                              .replaceAll(RegExp(r" +\(.+\)$"), "");
+                          // 履歴に追加
+                          final notifier =
+                              ref.read(historyNotifierProvider.notifier);
+                          notifier.addData(newCardName, newUrl);
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => CardView(
+                                pageUrl: newUrl, cardName: newCardName),
+                            settings: RouteSettings(name: '/card/$newCardName'),
+                          ));
+                        } else {
+                          launchUrlString(url);
+                        }
+                      });
+                },
+              );
             }
           },
         ),
       ),
       floatingActionButton: Consumer(
         builder: (BuildContext context, WidgetRef ref, Widget? child) {
+          // favorite control
           final favorites = ref.watch(favoriteNotifierProvider);
           return FloatingActionButton(
               onPressed: () {
                 var notifier = ref.read(favoriteNotifierProvider.notifier);
                 favorites.containsKey(cardName)
-                    ? notifier.removeFavorite(cardName)
-                    : notifier.addFavorite(cardName, pageUrl);
+                    ? notifier.removeData(cardName)
+                    : notifier.addData(cardName, pageUrl);
               },
               tooltip: favorites.containsKey(cardName)
                   ? "Remove from Favorite"
