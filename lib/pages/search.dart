@@ -35,11 +35,13 @@ class SearchWordNotifier extends _$SearchWordNotifier {
 }
 
 // 行ったり来たりしても状態を保持してほしいならHook
-class Search extends StatelessWidget {
+class Search extends HookConsumerWidget {
   const Search({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchWords = ref.watch(searchWordNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -53,20 +55,15 @@ class Search extends StatelessWidget {
               padding: EdgeInsets.all(8.0),
               child: CustomSearchBar(),
             ),
-            Consumer(
-              builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                final searchWords = ref.watch(searchWordNotifierProvider);
-                if (searchWords.isEmpty) {
-                  // searchWordsが空の場合の処理
-                  return Container();
-                } else {
-                  // searchWordsが空でない場合の処理
-                  return CardListView(
-                    input: searchWords.last,
-                  );
-                }
-              },
-            ),
+            if (searchWords.isEmpty)
+              const Center(
+                child: Text(
+                  "Wow. Such an Empty!",
+                  style: TextStyle(fontSize: 20),
+                ),
+              )
+            else
+              CardListView(input: searchWords.last),
           ],
         ),
       ),
@@ -74,13 +71,14 @@ class Search extends StatelessWidget {
   }
 }
 
-class CustomSearchBar extends StatelessWidget {
+class CustomSearchBar extends HookWidget {
   const CustomSearchBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        // 検索ワードを監視
         final searchWords = ref.watch(searchWordNotifierProvider);
         List<Widget> listButton = [];
         if (searchWords.isNotEmpty) {
@@ -107,7 +105,9 @@ class CustomSearchBar extends StatelessWidget {
           children: [
             TextField(
               controller: controller,
-              style: const TextStyle(fontSize: 18, color: Colors.black),
+              style: const TextStyle(
+                fontSize: 18,
+              ),
               decoration: InputDecoration(
                 prefixIcon: IconButton(
                   icon: const Icon(Icons.search),
@@ -146,7 +146,7 @@ class CustomSearchBar extends StatelessWidget {
 }
 
 // 検索結果のタイルを並べたWidget
-class CardListView extends StatelessWidget {
+class CardListView extends HookWidget {
   const CardListView({super.key, required this.input});
   final String input;
 
@@ -189,7 +189,7 @@ class CardListView extends StatelessWidget {
   }
 }
 
-class CardTile extends StatelessWidget {
+class CardTile extends HookWidget {
   const CardTile({super.key, required this.title, required this.url});
 
   final String title;
@@ -200,6 +200,7 @@ class CardTile extends StatelessWidget {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         // リンクを開いた時点で履歴を管理できるよう監視
+        // ignore: unused_local_variable
         final histories = ref.watch(historyNotifierProvider);
         final favorites = ref.watch(favoriteNotifierProvider);
         return Card(
@@ -251,7 +252,7 @@ Future<Map<String, String>> fetchSearchResult(
   Uri url = Uri.parse('https://yugioh-wiki.net/index.php?cmd=search');
   var data = {
     'encode_hint': 'ぷ',
-    'word': keyword,
+    'word': keyword.replaceAll('　', ' '),
     'type': searchMode,
   };
 

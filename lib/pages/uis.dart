@@ -199,13 +199,17 @@ class MySearchBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController controller = TextEditingController();
+    // 検索ワードを常に監視
     final searchWords = ref.watch(searchWordNotifierProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(
         autofocus: isFocus,
         controller: controller,
-        style: const TextStyle(fontSize: 18, color: Colors.black),
+        // Dark mode
+        style: const TextStyle(
+          fontSize: 18,
+        ),
         decoration: InputDecoration(
           prefixIcon: IconButton(
             icon: const Icon(Icons.search),

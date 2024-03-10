@@ -7,7 +7,7 @@ part of 'search.dart';
 // **************************************************************************
 
 String _$searchWordNotifierHash() =>
-    r'2356cb08e2a7d11208e6200bcd3685765aa4f9f1';
+    r'ced47d76973900bb42bd05a48175cc71e20b6a59';
 
 /// See also [SearchWordNotifier].
 @ProviderFor(SearchWordNotifier)

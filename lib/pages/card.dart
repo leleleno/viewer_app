@@ -10,7 +10,7 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher_string.dart';
 
-class CardView extends ConsumerWidget {
+class CardView extends HookConsumerWidget {
   const CardView({super.key, required this.pageUrl, required this.cardName});
 
   final String pageUrl;
@@ -19,6 +19,7 @@ class CardView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ページを開いた段階で履歴を更新できるよう監視
+    // ignore: unused_local_variable
     final histories = ref.watch(historyNotifierProvider);
     int selectedIndex = -1;
     // FAB visibility
