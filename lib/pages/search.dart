@@ -2,6 +2,7 @@ import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/data/favoritedata.dart';
 import 'package:first_app/data/historydata.dart';
 import 'package:first_app/data/searchdata.dart';
+import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
@@ -90,6 +91,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        // Darkmodeか確認
+        final settings = ref.watch(settingsNotifierProvider);
         // 検索ワードを監視
         final searchWords = ref.watch(searchNotifierProvider);
         // 検索バーに最初に入れるワード
@@ -129,30 +132,35 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             ),
             Visibility(
                 visible: _isFocused,
-                child: ListView.builder(
-                  // Columnの中に入れるときのエラー回避
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(), //追加
-                  // ListView.builder内のindexingエラーを修正
-                  itemCount: searchWords.length,
-                  itemBuilder: (BuildContext context, index) {
-                    var item = searchWords[index]; // indexを正しく指定
-                    // 空のアイテムをスキップ
-                    if (item != "") {
-                      return ListTile(
-                        title: Text(item),
-                        onTap: () {
-                          setState(() {
-                            controller.value =
-                                TextEditingValue(text: item); // TextFieldの値を更新
-                            _focusNode.unfocus(); // リストアイテムをタップしたらフォーカスを外す
-                          });
-                        },
-                      );
-                    } else {
-                      return const SizedBox.shrink(); // 空のアイテムの場合は何も表示しない
-                    }
-                  },
+                child: Container(
+                  color: settings['isDark'] ? Colors.black : Colors.white,
+                  child: ListView.builder(
+                    // Columnの中に入れるときのエラー回避
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(), //追加
+                    // ListView.builder内のindexingエラーを修正
+                    itemCount: searchWords.length,
+                    itemBuilder: (BuildContext context, index) {
+                      // 逆向きに指定
+                      var item =
+                          List.from(searchWords.reversed)[index]; // indexを正しく指定
+                      // 空のアイテムをスキップ
+                      if (item != "") {
+                        return ListTile(
+                          title: Text(item),
+                          onTap: () {
+                            // そのワードで検索
+                            final notifier =
+                                ref.read(searchNotifierProvider.notifier);
+                            notifier.addData(item);
+                            _focusNode.unfocus();
+                          },
+                        );
+                      } else {
+                        return const SizedBox.shrink(); // 空のアイテムの場合は何も表示しない
+                      }
+                    },
+                  ),
                 )),
           ],
         );
@@ -182,9 +190,7 @@ class CardListView extends HookWidget {
           // 成功時の処理
           if (snapshot.data!.isEmpty || snapshot.data == null) {
             // 中身が空だった場合
-            return const Center(
-              child: Text("No search results!"),
-            );
+            return const SizedBox();
           } else {
             // 結果を表示
             Map<String, String> data = snapshot.data!;
