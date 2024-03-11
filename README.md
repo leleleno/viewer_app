@@ -1,10 +1,10 @@
 # 遊戯王wikiビューワーアプリ
 
 Flutterによる遊戯王wikiビューワーアプリ開発
-For Androidd
+For Android
 
 ## ダウンロード
-![GitHub Release](https://img.shields.io/github/v/release/leleleno/py_flet)
+![GitHub Release](https://img.shields.io/github/v/release/leleleno/viewer_app)
 
 ## Getting Started
 
