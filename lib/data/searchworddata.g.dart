@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'searchdata.dart';
+part of 'searchworddata.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$searchNotifierHash() => r'e53a6a2cf8fcc5520408fc99377255d0e43438cd';
+String _$searchWordNotifierHash() =>
+    r'532b1b261aeda39bed6a8849b0231394c1601fcf';
 
-/// See also [SearchNotifier].
-@ProviderFor(SearchNotifier)
-final searchNotifierProvider =
-    AutoDisposeNotifierProvider<SearchNotifier, List>.internal(
-  SearchNotifier.new,
-  name: r'searchNotifierProvider',
+/// See also [SearchWordNotifier].
+@ProviderFor(SearchWordNotifier)
+final searchWordNotifierProvider =
+    AutoDisposeNotifierProvider<SearchWordNotifier, String>.internal(
+  SearchWordNotifier.new,
+  name: r'searchWordNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$searchNotifierHash,
+      : _$searchWordNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SearchNotifier = AutoDisposeNotifier<List>;
+typedef _$SearchWordNotifier = AutoDisposeNotifier<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

@@ -1,4 +1,5 @@
 import 'package:first_app/data/searchdata.dart';
+import 'package:first_app/data/searchworddata.dart';
 import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/favorite.dart';
 import 'package:first_app/pages/history.dart';
@@ -203,8 +204,7 @@ class MySearchBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController controller = TextEditingController();
     // 検索ワードを常に監視
-    // ignore: unused_local_variable
-    final searchWords = ref.watch(searchNotifierProvider);
+    // final searchWords = ref.watch(searchNotifierProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(
@@ -216,6 +216,7 @@ class MySearchBar extends ConsumerWidget {
         ),
         decoration: InputDecoration(
           prefixIcon: IconButton(
+            // 検索ボタン
             icon: const Icon(Icons.search),
             onPressed: () {
               // TextFieldのテキストをクリアする
@@ -227,6 +228,9 @@ class MySearchBar extends ConsumerWidget {
               // 検索ワード履歴に追加
               final notifier = ref.read(searchNotifierProvider.notifier);
               notifier.addData(value);
+              // 検索ワードを更新
+              final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
+              searchNotifier.newSearch(value);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => const Search(),
                 settings: const RouteSettings(name: "/search"),
@@ -243,6 +247,7 @@ class MySearchBar extends ConsumerWidget {
           hintText: "Search bar",
           border: const OutlineInputBorder(),
         ),
+        // エンターで飛ぶ
         onSubmitted: (String value) {
           // TextFieldのテキストをクリアする
           controller.clear();
@@ -251,6 +256,9 @@ class MySearchBar extends ConsumerWidget {
           // 検索ワード履歴に追加
           final notifier = ref.read(searchNotifierProvider.notifier);
           notifier.addData(value);
+          // 検索ワードを更新
+          final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
+          searchNotifier.newSearch(value);
           Navigator.of(context).pop();
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const Search(),

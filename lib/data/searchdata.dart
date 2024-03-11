@@ -2,7 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'searchdata.g.dart';
-
+// Database and Provider for Search history
 @riverpod
 class SearchNotifier extends _$SearchNotifier {
   final _myBox = Hive.box('mybox');
@@ -14,7 +14,7 @@ class SearchNotifier extends _$SearchNotifier {
     return List.from(db.searchwords);
   }
 
-  void addData(String value) {
+  void addData(value) {
     db.addData(value);
     db.updateData();
     state = List.from(db.searchwords);
@@ -23,9 +23,10 @@ class SearchNotifier extends _$SearchNotifier {
   void removeData(value) {
     db.searchwords.remove(value);
     db.updateData();
-    state = List.from(db.searchwords);
+    // state = db.searchwords;
   }
 }
+
 
 class SearchDataBase {
   List searchwords = [];
@@ -38,7 +39,7 @@ class SearchDataBase {
   }
 
   // new search histroy adding
-  void addData(String value) {
+  void addData(value) {
     // ダブりは消す
     if (searchwords.contains(value)) {
       searchwords.remove(value);
