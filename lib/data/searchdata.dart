@@ -34,22 +34,26 @@ class SearchDataBase {
 
   // load the data from database
   void loadData() {
-    searchwords = _myBox.get('SEARCH') ?? [];
+    searchwords = _myBox.get('SEARCH') ?? [''];
   }
 
-  // new histroy adding
+  // new search histroy adding
   void addData(String value) {
+    // ダブりは消す
     if (searchwords.contains(value)) {
       searchwords.remove(value);
     }
+    // 追加
     searchwords.add(value);
-    if (searchwords.length > 20) {
+    // 長くなったら消す
+    if (searchwords.length > 10) {
       searchwords.removeAt(0);
     }
   }
 
   // data updated
   void updateData() {
+    // データベースをアプデ
     _myBox.put('SEARCH', searchwords);
   }
 }
