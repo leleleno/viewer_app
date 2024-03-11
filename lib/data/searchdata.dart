@@ -23,7 +23,7 @@ class SearchNotifier extends _$SearchNotifier {
   void removeData(value) {
     db.searchwords.remove(value);
     db.updateData();
-    // state = db.searchwords;
+    state = db.searchwords;
   }
 }
 

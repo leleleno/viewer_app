@@ -11,9 +11,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
 
-class Search extends StatelessWidget {
+class Search extends StatefulWidget {
   const Search({super.key});
 
+  @override
+  State<Search> createState() => _SearchState();
+}
+
+class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,39 +158,41 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             // 検索履歴を表示
             ListView.builder(
                 // Columnの中に入れるときのエラー回避
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(), //追加
-                // 縁取り
-                // ListView.builder内のindexingエラーを修正
-                itemCount: searchWords.length,
-                itemBuilder: (BuildContext context, index) {
-                  // 逆向きに指定
-                  var item =
-                      List.from(searchWords.reversed)[index]; // indexを正しく指定
-                  // 空のアイテムをスキップ
-                  if (item != "") {
-                    return ListTile(
-                      title: Text(item),
-                      // 履歴消去ボタン
-                      trailing: IconButton(onPressed: (){
-                        final notifier = ref.read(searchNotifierProvider.notifier);
-                        notifier.removeData(item);
-                      }, icon: const Icon(Icons.delete)),
-                      onTap: () {
-                        // そのワードで検索
-                        final notifier = ref.read(searchNotifierProvider.notifier);
-                        notifier.addData(item);
-                        final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
-                        searchNotifier.newSearch(item);
-                        _focusNode.unfocus();
-                      },
-                    );
-                  } else {
-                    // 空のアイテムの場合は何も表示しない
-                    return const SizedBox.shrink();
-                  }
-                },
-              ),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(), //追加
+              // 縁取り
+              // ListView.builder内のindexingエラーを修正
+              itemCount: searchWords.length,
+              itemBuilder: (BuildContext context, index) {
+                // 逆向きに指定
+                var item =
+                    List.from(searchWords.reversed)[index]; // indexを正しく指定
+                // 空のアイテムをスキップ
+                if (item != "") {
+                  return ListTile(
+                    title: Text(item),
+                    // 履歴消去ボタン
+                    trailing: IconButton(onPressed: (){
+                      final notifier = ref.read(searchNotifierProvider.notifier);
+                      notifier.removeData(item);
+                      // 検索履歴を削除した後にリビルドされるようにする
+                      setState(() {});
+                    }, icon: const Icon(Icons.delete)),
+                    onTap: () {
+                      // そのワードで検索
+                      final notifier = ref.read(searchNotifierProvider.notifier);
+                      notifier.addData(item);
+                      final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
+                      searchNotifier.newSearch(item);
+                      _focusNode.unfocus();
+                    },
+                  );
+                } else {
+                  // 空のアイテムの場合は何も表示しない
+                  return const SizedBox.shrink();
+                }
+              },
+            ),
           ],
         );
       },

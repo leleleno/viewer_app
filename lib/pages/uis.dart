@@ -120,9 +120,10 @@ class MyDrawer extends StatelessWidget {
                       // もし検索画面じゃなかったら
                       if (index != 1) {
                         // 検索ワードリセット
+                        // 履歴には足さない
                         final notifier =
-                            ref.read(searchNotifierProvider.notifier);
-                        notifier.addData("");
+                            ref.read(searchWordNotifierProvider.notifier);
+                        notifier.newSearch("");
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const Search(),
                           settings: const RouteSettings(name: "/search"),
