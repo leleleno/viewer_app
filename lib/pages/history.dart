@@ -6,31 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-//flutter pub run build_runner build --delete-conflicting-outputs
-// @riverpod
-// class HistoryNotifier extends _$HistoryNotifier {
-//   // {card name: url}
-//   @override
-//   Map<String, String> build() {
-//     return {};
-//   }
-
-//   void updateHistory(String title, String url) {
-//     if (state.containsKey(title)) {
-//       // 一度消して再追加することで最後尾に持っていく
-//       state = {...state}..remove(title);
-//     }
-//     state = {...state, title: url};
-//     if (state.length > 100) {
-//       state = {...state}..remove(state.keys.first);
-//     }
-//   }
-
-//   void deleteHistory(String title) {
-//     state = {...state}..remove(title);
-//   }
-// }
-
 class History extends HookConsumerWidget {
   const History({super.key});
   final String title = "履歴";

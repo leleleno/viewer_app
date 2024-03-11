@@ -6,15 +6,12 @@ import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
 
-// 行ったり来たりしても状態を保持してほしいならHook
 class Search extends StatelessWidget {
   const Search({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,34 +20,25 @@ class Search extends StatelessWidget {
         title: const Text("検索"),
       ),
       drawer: const MyDrawer(index: 1),
-      body: Consumer(
-        builder: (BuildContext context, WidgetRef ref, Widget? child) {
-          final searchWords = ref.watch(searchNotifierProvider);
-          return Stack(
-            children: [
-              if (searchWords.isEmpty)
-                const SizedBox() // Center ウィジェットを SizedBox に置き換えます
-              else
-                Positioned.fill(
-                    top: MediaQuery.of(context).padding.top +
-                        kToolbarHeight +
-                        32.0,
-                    left: 10,
-                    right: 10,
-                    child: SingleChildScrollView(
-                        child: CardListView(input: searchWords.last))),
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0, // Stack の右端まで広げるために right: 0 を追加します
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CustomSearchBar(),
-                ),
-              ),
-            ],
-          );
-        },
+      body: //SingleChildScrollView(child: CardListView(),)
+      Stack(
+        children: [
+          Positioned.fill(
+            top: AppBar().preferredSize.height + MediaQuery.of(context).padding.top + 32.0,
+            // ignore: prefer_const_constructors
+            child: SingleChildScrollView(child: CardListView())
+          ),
+          // ignore: prefer_const_constructors
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0, // Stack の右端まで広げるために right: 0 を追加します
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CustomSearchBar(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -108,36 +96,59 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 fontSize: 18,
               ),
               decoration: InputDecoration(
-                prefixIcon: IconButton(
+                // 先頭のボタン
+                prefixIcon: _isFocused
+                // フォーカスあり
+                ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    // Focusを外す
+                    FocusScope.of(context).unfocus();
+                  },
+                )
+                // フォーカスなし
+                : IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {
                     String value = controller.text;
                     final notifier = ref.read(searchNotifierProvider.notifier);
                     notifier.addData(value);
+                    // Focusを外す
+                    FocusScope.of(context).unfocus();
                   },
                 ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    controller.clear();
-                  },
-                ),
+                // 後ろのボタン
+                suffixIcon: _isFocused
+                // フォーカスあり
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      controller.clear();
+                      // 検索履歴をクリア
+                      final notifier = ref.read(searchNotifierProvider.notifier);
+                      notifier.addData('');
+                    },
+                  )
+                  // フォーカスなし
+                : IconButton(onPressed: (){}, icon: const Icon(Icons.add)),
                 hintText: "Search bar",
                 border: const OutlineInputBorder(),
               ),
               onSubmitted: (value) {
                 final notifier = ref.read(searchNotifierProvider.notifier);
                 notifier.addData(value);
+                // Focusを外す
+                FocusScope.of(context).unfocus();
               },
             ),
+            // 検索履歴を表示
             Visibility(
                 visible: _isFocused,
-                child: Container(
-                  color: settings['isDark'] ? Colors.black : Colors.white,
                   child: ListView.builder(
                     // Columnの中に入れるときのエラー回避
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(), //追加
+                    // 縁取り
                     // ListView.builder内のindexingエラーを修正
                     itemCount: searchWords.length,
                     itemBuilder: (BuildContext context, index) {
@@ -146,22 +157,30 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                           List.from(searchWords.reversed)[index]; // indexを正しく指定
                       // 空のアイテムをスキップ
                       if (item != "") {
-                        return ListTile(
-                          title: Text(item),
-                          onTap: () {
-                            // そのワードで検索
-                            final notifier =
-                                ref.read(searchNotifierProvider.notifier);
-                            notifier.addData(item);
-                            _focusNode.unfocus();
-                          },
+                        return Container(
+                          padding: const EdgeInsets.only(left: 1, right: 1),
+                          decoration : BoxDecoration(
+                            color: settings['isDark'] ? Colors.black : Colors.white,
+                            // border
+                            border: const Border(bottom: BorderSide(width: 0.2))
+                          ),
+                          child: ListTile(
+                            title: Text(item),
+                            onTap: () {
+                              // そのワードで検索
+                              final notifier =
+                                  ref.read(searchNotifierProvider.notifier);
+                              notifier.addData(item);
+                              _focusNode.unfocus();
+                            },
+                          ),
                         );
                       } else {
                         return const SizedBox.shrink(); // 空のアイテムの場合は何も表示しない
                       }
                     },
                   ),
-                )),
+                ),
           ],
         );
       },
@@ -169,45 +188,49 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   }
 }
 
-// 検索結果のタイルを並べたWidget
-class CardListView extends HookWidget {
-  const CardListView({super.key, required this.input});
-  final String input;
+// 検索結果のタイルを並べるWidget
+class CardListView extends ConsumerWidget {
+  const CardListView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, String>>(
-      future: fetchSearchResult(keyword: input),
-      builder:
-          (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // 待機中の処理
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          // 通信失敗時の処理
-          return SelectableText('Network Error: ${snapshot.error}');
-        } else {
-          // 成功時の処理
-          if (snapshot.data!.isEmpty || snapshot.data == null) {
-            // 中身が空だった場合
-            return const SizedBox();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchWords = ref.watch(searchNotifierProvider);
+    if (searchWords.isNotEmpty && searchWords.last != ''){
+      return FutureBuilder<Map<String, String>>(
+        future: fetchSearchResult(keyword: searchWords.last),
+        builder:
+            (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // 待機中の処理
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            // 通信失敗時の処理
+            return SelectableText('Network Error: ${snapshot.error}');
           } else {
-            // 結果を表示
-            Map<String, String> data = snapshot.data!;
-            return Column(
-              children: data.entries.map((entry) {
-                String title = entry.key;
-                String url = entry.value;
-                return CardTile(
-                  title: title,
-                  url: url,
-                );
-              }).toList(),
-            );
+            // 成功時の処理
+            if (snapshot.data == null || snapshot.data!.isEmpty) {
+              // 中身が空だった場合
+              return const SizedBox();
+            } else {
+              // 結果を表示
+              Map<String, String> data = snapshot.data!;
+              return Column(
+                children: data.entries.map((entry) {
+                  String title = entry.key;
+                  String url = entry.value;
+                  return CardTile(
+                    title: title,
+                    url: url,
+                  );
+                }).toList(),
+              );
+            }
           }
-        }
-      },
-    );
+        },
+      );
+    } else{
+      return const SizedBox();
+    }
   }
 }
 

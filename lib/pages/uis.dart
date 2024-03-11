@@ -119,9 +119,9 @@ class MyDrawer extends StatelessWidget {
                       // もし検索画面じゃなかったら
                       if (index != 1) {
                         // 検索ワードリセット
-                        // final notifier =
-                        //     ref.read(searchWordNotifierProvider.notifier);
-                        // notifier.addSearchWord("");
+                        final notifier =
+                            ref.read(searchNotifierProvider.notifier);
+                        notifier.addData("");
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const Search(),
                           settings: const RouteSettings(name: "/search"),
@@ -180,7 +180,7 @@ class MyDrawer extends StatelessWidget {
                     ? const AssetImage('assets/icons/github/github-mark-white.png')
                     : const AssetImage('assets/icons/github/github-mark.png'),
                 ),
-                title: const Text('Github link'),
+                title: const Text('Github'),
                 selected: false,
                 onTap: () {
                   Navigator.pop(context);
@@ -220,15 +220,16 @@ class MySearchBar extends ConsumerWidget {
             onPressed: () {
               // TextFieldのテキストをクリアする
               controller.clear();
-              // modalsheet閉じる
-              Navigator.of(context).pop();
+              // Focusを外す
+              FocusScope.of(context).unfocus();
               // Trigger onSubmitted event manually
               String value = controller.text;
+              // 検索ワード履歴に追加
               final notifier = ref.read(searchNotifierProvider.notifier);
               notifier.addData(value);
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => const Search(),
-                settings: RouteSettings(name: "/search/$value"),
+                settings: const RouteSettings(name: "/search"),
               ));
             },
           ),
@@ -245,13 +246,15 @@ class MySearchBar extends ConsumerWidget {
         onSubmitted: (String value) {
           // TextFieldのテキストをクリアする
           controller.clear();
-          // modalsheet閉じる
+          // Focusを外す
+          FocusScope.of(context).unfocus();
+          // 検索ワード履歴に追加
           final notifier = ref.read(searchNotifierProvider.notifier);
           notifier.addData(value);
           Navigator.of(context).pop();
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const Search(),
-            settings: RouteSettings(name: "/search/$value"),
+            settings: const RouteSettings(name: "/search"),
           ));
         },
       ),

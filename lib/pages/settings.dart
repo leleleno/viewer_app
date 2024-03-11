@@ -3,19 +3,6 @@ import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-//flutter pub run build_runner build --delete-conflicting-outputs
-// @riverpod
-// class IsDarkNotifier extends _$IsDarkNotifier {
-//   @override
-//   bool build() {
-//     return false;
-//   }
-
-//   // 状態変更関数
-//   void updateState(bool value) {
-//     state = value;
-//   }
-// }
 
 class Settings extends ConsumerWidget {
   const Settings({super.key});

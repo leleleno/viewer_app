@@ -54,7 +54,9 @@ class _HomeState extends State<Home> {
           ),
           GestureDetector(
             child: const Text('アップデート'),
-            onTap: (){},
+            onTap: (){
+              Navigator.of(context).pop();
+            },
           )
         ],
       );
