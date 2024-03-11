@@ -83,12 +83,12 @@ class CardView extends StatelessWidget {
                   ? "Remove from Favorite"
                   : "Add to Favorite",
               backgroundColor: Theme.of(context).primaryColor.withOpacity(0.3),
-              shape: CircleBorder(),
+              shape: const CircleBorder(),
               child: Icon(
                 favorites.containsKey(cardName)
                     ? Icons.favorite
                     : Icons.favorite_border,
-                color: Color.fromARGB(255, 252, 158, 189),
+                color: const Color.fromARGB(255, 252, 158, 189),
               ));
         },
       ),

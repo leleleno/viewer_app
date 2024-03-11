@@ -9,7 +9,7 @@ Future<void> main() async {
   // Hiveの初期化
   await Hive.initFlutter();
   // open the box
-  // ignore: unused_local_variable
+  // ignore: unused_local_variable, no_leading_underscores_for_local_identifiers
   var _myBox = await Hive.openBox('mybox');
 
   runApp(const ProviderScope(child: MyApp()));

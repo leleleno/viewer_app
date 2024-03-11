@@ -33,8 +33,10 @@ class Search extends StatelessWidget {
             top: 0,
             left: 0,
             right: 0, // Stack の右端まで広げるために right: 0 を追加します
+            // ignore: prefer_const_constructors
             child: Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
+              // ignore: prefer_const_constructors
               child: CustomSearchBar(),
             ),
           ),
@@ -87,6 +89,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         TextEditingController controller = TextEditingController(
           text: searchWords.isNotEmpty ? searchWords.last : "",
         );
+        // カーソルが一番後ろに合うように
+        controller.selection = TextSelection.fromPosition(TextPosition(offset: searchWords.last.length));
         return Column(
           children: [
             TextField(
