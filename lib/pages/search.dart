@@ -41,7 +41,7 @@ class _SearchState extends State<Search> {
             right: 0, // Stack の右端まで広げるために right: 0 を追加します
             // ignore: prefer_const_constructors
             child: Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               // ignore: prefer_const_constructors
               child: CustomSearchBar(),
             ),
