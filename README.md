@@ -1,11 +1,8 @@
 # 遊戯王wikiビューワーアプリ
 
 Flutterによる遊戯王wikiビューワーアプリ開発
+For Androidd
 
-現在リリース済み：
-- [x] Android
-- [ ] iOS
-- [ ] Windows
 
 ## Getting Started
 
