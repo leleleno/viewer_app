@@ -10,11 +10,7 @@ class Settings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // // ref box
-    // final _myBox = Hive.box('mybox');
-    // // settings 開く
-    // SettingsDataBase db = SettingsDataBase();
-    // db.loadData();
+    // 設定データ確認
     final settings = ref.watch(settingsNotifierProvider);
     const int selectedIndex = 4;
     return CommonScaffold(
@@ -26,7 +22,7 @@ class Settings extends ConsumerWidget {
             child: SwitchListTile(
               title: const Text("外部リンク確認"),
               subtitle: const Text("外部リンクを開く前に警告します"),
-              value: settings['checkLink'],
+              value: settings['checkLink'] ?? true,
               onChanged: (bool value) {
                 final notifier = ref.read(settingsNotifierProvider.notifier);
                 notifier.changeData('checkLink', value);
@@ -35,9 +31,9 @@ class Settings extends ConsumerWidget {
           ),
           Card(
             child: SwitchListTile(
-              title: const Text("アップデート"),
-              subtitle: const Text("起動時に自動でアップデートを確認"),
-              value: false,
+              title: const Text("更新チェック"),
+              subtitle: const Text("そのうち追加します"),
+              value: settings['autoUpdate'] ?? false,
               onChanged: (bool value) {},
             ),
           ),
@@ -55,7 +51,7 @@ class Settings extends ConsumerWidget {
           Card(
             child: ListTile(
               title: const Text('アップデートを確認'),
-              subtitle: const Text(''),
+              subtitle: const Text('そのうち追加します'),
               onTap: () {},
             ),
           ),
