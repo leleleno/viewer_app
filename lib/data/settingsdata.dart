@@ -29,7 +29,8 @@ class SettingsDataBase {
   // load data from database
   // 空なら初期設定を読み込む
   void loadData() {
-    settings = _myBox.get('SETTINGS') ?? {'isDark': false};
+    settings = _myBox.get('SETTINGS') ??
+        {'isDark': false, "checkLink": true, 'autoUpdate': false};
   }
 
   // settings updatet

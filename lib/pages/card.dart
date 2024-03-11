@@ -1,6 +1,7 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/data/favoritedata.dart';
 import 'package:first_app/data/historydata.dart';
+import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html_v3/flutter_html.dart';
@@ -36,6 +37,7 @@ class CardView extends StatelessWidget {
             } else {
               return Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                  final settings = ref.watch(settingsNotifierProvider);
                   Future.delayed(Duration.zero, () {
                     // 履歴に追加
                     final notifier = ref.read(historyNotifierProvider.notifier);
@@ -59,7 +61,33 @@ class CardView extends StatelessWidget {
                             settings: RouteSettings(name: '/card/$newCardName'),
                           ));
                         } else {
-                          launchUrlString(url);
+                          if (settings['checkLink']) {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('外部リンクを開きます'),
+                                    content: Text(url),
+                                    actions: [
+                                      GestureDetector(
+                                        child: const Text("キャンセル"),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      GestureDetector(
+                                        child: const Text('続行'),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          launchUrlString(url);
+                                        },
+                                      )
+                                    ],
+                                  );
+                                });
+                          } else {
+                            launchUrlString(url);
+                          }
                         }
                       });
                 },
