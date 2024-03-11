@@ -1,9 +1,9 @@
 import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // import追加
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'; // import追加
 
 Future<void> main() async {
   // Hiveの初期化
@@ -13,6 +13,8 @@ Future<void> main() async {
   var _myBox = await Hive.openBox('mybox');
 
   runApp(const ProviderScope(child: MyApp()));
+
+
 }
 
 class MyApp extends ConsumerWidget {
@@ -25,16 +27,9 @@ class MyApp extends ConsumerWidget {
     bool isDark = settings['isDark'];
     return MaterialApp(
       title: 'My first app',
-      theme: isDark
-          // dark mode on
-          ? ThemeData(
-              colorScheme: const ColorScheme.dark(),
-              fontFamily: 'Noto Sans Japanese')
-          // dark mode off
-          : ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow),
-              useMaterial3: true,
-              fontFamily: 'Noto Sans Japanese'),
+      theme: ThemeData(fontFamily:'Noto Sans Japanese',
+      // ダークモードでテーマを変更
+      colorScheme: isDark?const ColorScheme.dark(): ColorScheme.fromSeed(seedColor: Colors.yellow),),
       // ローカライズ　日本語フォント
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

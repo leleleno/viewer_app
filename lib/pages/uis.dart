@@ -176,9 +176,10 @@ class MyDrawer extends StatelessWidget {
               ),
               ListTile(
                 leading: ImageIcon(
-                isDark
-                  ? const AssetImage('assets/icons/github-mark-white.png')
-                  : const AssetImage('assets/icons/github-mark.png'),),
+                  isDark
+                    ? const AssetImage('assets/icons/github/github-mark-white.png')
+                    : const AssetImage('assets/icons/github/github-mark.png'),
+                ),
                 title: const Text('Github link'),
                 selected: false,
                 onTap: () {
@@ -202,6 +203,7 @@ class MySearchBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController controller = TextEditingController();
     // 検索ワードを常に監視
+    // ignore: unused_local_variable
     final searchWords = ref.watch(searchNotifierProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
