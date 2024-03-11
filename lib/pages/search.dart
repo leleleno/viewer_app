@@ -22,18 +22,19 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      //   title: const Text("検索"),
-      // ),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text("検索"),
+      ),
       drawer: const MyDrawer(index: 1),
       body: Stack(
         children: [
           Positioned.fill(
-            top: AppBar().preferredSize.height + MediaQuery.of(context).padding.top + 32.0,
-            // ignore: prefer_const_constructors
-            child: SingleChildScrollView(child: CardListView())
-          ),
+              top: AppBar().preferredSize.height +
+                  MediaQuery.of(context).padding.top +
+                  32.0,
+              // ignore: prefer_const_constructors
+              child: SingleChildScrollView(child: CardListView())),
           // ignore: prefer_const_constructors
           Positioned(
             top: 0,
@@ -43,7 +44,8 @@ class _SearchState extends State<Search> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               // ignore: prefer_const_constructors
-              child: CustomSearchBar(),
+              // child: CustomSearchBar(),
+              child: const CustomSearchBar(),
             ),
           ),
         ],
@@ -52,149 +54,97 @@ class _SearchState extends State<Search> {
   }
 }
 
-class CustomSearchBar extends StatefulWidget {
+class CustomSearchBar extends ConsumerWidget {
   const CustomSearchBar({super.key});
 
   @override
-  State<CustomSearchBar> createState() => _CustomSearchBarState();
-}
-
-class _CustomSearchBarState extends State<CustomSearchBar> {
-  late FocusNode _focusNode;
-  bool _isFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-    _focusNode.addListener(_handleFocusChange);
-  }
-
-  // フォーカスの変更を処理するハンドラ
-  void _handleFocusChange() {
-    setState(() {
-      _isFocused = _focusNode.hasFocus;
-    });
-  } // TextFieldのfocusNodeをdispose
-
-  @override
-  void dispose() {
-    _focusNode.dispose(); // disposeを実装
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(
-      builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        // Darkmodeか確認
-        // ignore: unused_local_variable
-        final settings = ref.watch(settingsNotifierProvider);
-        // 検索履歴を監視
-        final searchWords = ref.watch(searchNotifierProvider);
-        // 検索ワードを監視
-        final searchWord = ref.watch(searchWordNotifierProvider);
-        // 検索バーに最初に入れるワード
-        TextEditingController controller = TextEditingController(
-          text: searchWord,
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 検索履歴を監視
+    final searchWords = ref.watch(searchNotifierProvider);
+    // 検索ワードを監視
+    final searchWord = ref.watch(searchWordNotifierProvider);
+    // // 検索バーに最初に入れるワード
+    // TextEditingController controller = TextEditingController(
+    //   text: searchWords.last,
+    // );
+    // // カーソルが一番後ろに合うように
+    // controller.selection = TextSelection.fromPosition(
+    //     TextPosition(offset: controller.text.length));
+    return SearchAnchor(
+      isFullScreen: false,
+      builder: (BuildContext context, SearchController controller) {
+        return SearchBar(
+          controller: controller,
+          padding: const MaterialStatePropertyAll<EdgeInsets>(
+            EdgeInsets.symmetric(horizontal: 16.0),
+          ),
+          // Tapで開く
+          onTap: () {
+            controller.openView();
+          },
+          onChanged: (value) {
+            // 検索履歴に追加
+            final notifier = ref.read(searchNotifierProvider.notifier);
+            notifier.addData(value);
+            // 検索ワードを更新
+            final searchNotifier =
+                ref.read(searchWordNotifierProvider.notifier);
+            searchNotifier.newSearch(value);
+          },
+          // ワードで検索
+          onSubmitted: (value) {
+            // 検索履歴に追加
+            final notifier = ref.read(searchNotifierProvider.notifier);
+            notifier.addData(value);
+            // 検索ワードを更新
+            final searchNotifier =
+                ref.read(searchWordNotifierProvider.notifier);
+            searchNotifier.newSearch(value);
+            // // Focusを外す
+            // FocusScope.of(context).unfocus();
+          },
+          leading: IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              String value = controller.text;
+              // 検索履歴に追加
+              final notifier = ref.read(searchNotifierProvider.notifier);
+              notifier.addData(value);
+              // 検索ワードを更新
+              final searchNotifier =
+                  ref.read(searchWordNotifierProvider.notifier);
+              searchNotifier.newSearch(value);
+            },
+          ),
         );
-        // カーソルが一番後ろに合うように
-        controller.selection = TextSelection.fromPosition(TextPosition(offset: searchWord.length));
-        return Column(
-          children: [
-            TextField(
-              focusNode: _focusNode,
-              controller: controller,
-              style: const TextStyle(
-                fontSize: 18,
+      },
+      // サジェスト：検索履歴
+      suggestionsBuilder: (BuildContext context, SearchController controller) {
+        return List<Widget>.generate(searchWords.length, (int index) {
+          final String item = List.from(searchWords.reversed)[index];
+          if (item != '') {
+            return ListTile(
+              title: Text(item),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  // 履歴から削除
+                  final notifier = ref.read(searchNotifierProvider.notifier);
+                  notifier.removeData(item);
+                },
               ),
-              decoration: InputDecoration(
-                fillColor: Theme.of(context).colorScheme.inversePrimary,
-                // 先頭のボタン
-                prefixIcon: _isFocused
-                    // フォーカスあり
-                    ? IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        // Focusを外す
-                        FocusScope.of(context).unfocus();
-                      },
-                    )
-                    // フォーカスなし
-                    : IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {
-                        // Focusを外す
-                        FocusScope.of(context).unfocus();
-                        // Drawer open
-                        Scaffold.of(context).openDrawer();
-                      },
-                    ),
-                // 後ろのボタン
-                suffixIcon: _isFocused
-                // フォーカスあり
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      controller.clear();
-                    },
-                  )
-                  // フォーカスなし
-                : IconButton(onPressed: (){}, icon: const Icon(Icons.add)),
-                hintText: "Search bar",
-                border: const OutlineInputBorder(),
-              ),
-              onSubmitted: (value) {
-                // 検索履歴に追加
-                final notifier = ref.read(searchNotifierProvider.notifier);
-                notifier.addData(value);
+              onTap: () {
+                controller.closeView(item);
                 // 検索ワードを更新
-                final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
-                searchNotifier.newSearch(value);
-                // Focusを外す
-                FocusScope.of(context).unfocus();
+                final searchNotifier =
+                    ref.read(searchWordNotifierProvider.notifier);
+                searchNotifier.newSearch(item);
               },
-            ),
-            // 検索履歴を表示
-            ListView.builder(
-                // Columnの中に入れるときのエラー回避
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(), //追加
-              // 縁取り
-              // ListView.builder内のindexingエラーを修正
-              itemCount: searchWords.length,
-              itemBuilder: (BuildContext context, index) {
-                // 逆向きに指定
-                var item =
-                    List.from(searchWords.reversed)[index]; // indexを正しく指定
-                // 空のアイテムをスキップ
-                if (item != "") {
-                  return ListTile(
-                    title: Text(item),
-                    // 履歴消去ボタン
-                    trailing: IconButton(onPressed: (){
-                      final notifier = ref.read(searchNotifierProvider.notifier);
-                      notifier.removeData(item);
-                      // 検索履歴を削除した後にリビルドされるようにする
-                      setState(() {});
-                    }, icon: const Icon(Icons.delete)),
-                    onTap: () {
-                      // そのワードで検索
-                      final notifier = ref.read(searchNotifierProvider.notifier);
-                      notifier.addData(item);
-                      final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
-                      searchNotifier.newSearch(item);
-                      _focusNode.unfocus();
-                    },
-                  );
-                } else {
-                  // 空のアイテムの場合は何も表示しない
-                  return const SizedBox.shrink();
-                }
-              },
-            ),
-          ],
-        );
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
+        });
       },
     );
   }
@@ -207,11 +157,11 @@ class CardListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchWord = ref.watch(searchWordNotifierProvider);
-    if (searchWord != ''){
+    if (searchWord != '') {
       return FutureBuilder<Map<String, String>>(
         future: fetchSearchResult(keyword: searchWord),
-        builder:
-            (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
+        builder: (BuildContext context,
+            AsyncSnapshot<Map<String, String>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // 待機中の処理
             return const Center(child: CircularProgressIndicator());
@@ -240,7 +190,7 @@ class CardListView extends ConsumerWidget {
           }
         },
       );
-    } else{
+    } else {
       return const SizedBox();
     }
   }
@@ -265,16 +215,14 @@ class CardTile extends ConsumerWidget {
             // もしお気に入りなら
             ? IconButton(
                 onPressed: () {
-                  final notifier =
-                      ref.read(favoriteNotifierProvider.notifier);
+                  final notifier = ref.read(favoriteNotifierProvider.notifier);
                   notifier.removeData(title);
                 },
                 icon: const Icon(Icons.favorite))
             // もしお気に入りじゃなかったら
             : IconButton(
                 onPressed: () {
-                  final notifier =
-                      ref.read(favoriteNotifierProvider.notifier);
+                  final notifier = ref.read(favoriteNotifierProvider.notifier);
                   notifier.addData(title, url);
                 },
                 icon: const Icon(Icons.favorite_border)),
