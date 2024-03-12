@@ -61,6 +61,15 @@ class CustomSearchBar extends StatefulWidget {
 }
 
 class _CustomSearchBarState extends State<CustomSearchBar> {
+  late SearchController _searchController;
+  late FocusNode _searchFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = SearchController();
+    _searchFocusNode = FocusNode();
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer(
@@ -69,26 +78,29 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       final searchWords = ref.watch(searchNotifierProvider);
       // 検索ワードを監視
       final searchWord = ref.watch(searchWordNotifierProvider);
-      // TextEditingController _controller = TextEditingController(text: searchWords.last ?? searchWord);
-      // _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+      // 最初に入れるワード設定
+      _searchController.text = searchWords.last ?? searchWord;
+      _searchController.selection = TextSelection.fromPosition(TextPosition(offset: _searchController.text.length));
         return SearchAnchor.bar(
+          searchController: _searchController,
           barLeading: IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // String value = _controller.text;
-              // // 検索履歴に追加
-              // final notifier = ref.read(searchNotifierProvider.notifier);
-              // notifier.addData(value);
-              // // 検索ワードを更新
-              // final searchNotifier =
-              //     ref.read(searchWordNotifierProvider.notifier);
-              // searchNotifier.newSearch(value);
+              String value = _searchController.text;
+              // 検索履歴に追加
+              final notifier = ref.read(searchNotifierProvider.notifier);
+              notifier.addData(value);
+              // 検索ワードを更新
+              final searchNotifier =
+                  ref.read(searchWordNotifierProvider.notifier);
+              searchNotifier.newSearch(value);
             },
           ),
           // 後方にオプション開くボタン
           barTrailing: [IconButton(icon: const Icon(Icons.add),onPressed: (){},)],
           // Tapで開く
           onTap: () {
+            _searchController.openView();
           },
           // barの中身が変わったら
           onChanged: (value) {},
@@ -102,7 +114,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 ref.read(searchWordNotifierProvider.notifier);
             searchNotifier.newSearch(value);
             // Focusを外す
-            FocusScope.of(context).unfocus();
+            // _searchController.closeView(value);
           },
 
           suggestionsBuilder: (BuildContext context, SearchController controller) {
