@@ -186,8 +186,10 @@ class MySearchBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TextEditingController controller = TextEditingController();
-    // 検索ワードを常に監視
-    // final searchWords = ref.watch(searchNotifierProvider);
+    // 検索履歴を常に監視
+    final searchWords = ref.watch(searchNotifierProvider);
+    // 検索ワードを監視
+    final searchWord = ref.watch(searchWordNotifierProvider);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(

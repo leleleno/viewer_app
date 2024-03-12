@@ -69,53 +69,42 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       final searchWords = ref.watch(searchNotifierProvider);
       // 検索ワードを監視
       final searchWord = ref.watch(searchWordNotifierProvider);
-      TextEditingController _controller = TextEditingController(text: searchWords.last ?? searchWord);
-      _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
-        return SearchAnchor(
-          isFullScreen: false,
-          builder: (BuildContext context, SearchController _controller) {
-            return SearchBar(
-              controller: _controller,
-              padding: const MaterialStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 16.0),
-              ),
-              // 先頭に検索ボタン
-              leading: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  String value = _controller.text;
-                  // 検索履歴に追加
-                  final notifier = ref.read(searchNotifierProvider.notifier);
-                  notifier.addData(value);
-                  // 検索ワードを更新
-                  final searchNotifier =
-                      ref.read(searchWordNotifierProvider.notifier);
-                  searchNotifier.newSearch(value);
-                },
-              ),
-              // 後方にオプション開くボタン
-              trailing: [IconButton(icon: const Icon(Icons.add),onPressed: (){},)],
-              // Tapで開く
-              onTap: () {
-                _controller.openView();
-              },
-              // barの中身が変わったら
-              onChanged: (value) {},
-              // ワードで検索
-              onSubmitted: (value) {
-                // 検索履歴に追加
-                final notifier = ref.read(searchNotifierProvider.notifier);
-                notifier.addData(value);
-                // 検索ワードを更新
-                final searchNotifier =
-                    ref.read(searchWordNotifierProvider.notifier);
-                searchNotifier.newSearch(value);
-                // Focusを外す
-                FocusScope.of(context).unfocus();
-              },
-            );
+      // TextEditingController _controller = TextEditingController(text: searchWords.last ?? searchWord);
+      // _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+        return SearchAnchor.bar(
+          barLeading: IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // String value = _controller.text;
+              // // 検索履歴に追加
+              // final notifier = ref.read(searchNotifierProvider.notifier);
+              // notifier.addData(value);
+              // // 検索ワードを更新
+              // final searchNotifier =
+              //     ref.read(searchWordNotifierProvider.notifier);
+              // searchNotifier.newSearch(value);
+            },
+          ),
+          // 後方にオプション開くボタン
+          barTrailing: [IconButton(icon: const Icon(Icons.add),onPressed: (){},)],
+          // Tapで開く
+          onTap: () {
           },
-          // サジェスト：検索履歴
+          // barの中身が変わったら
+          onChanged: (value) {},
+          // ワードで検索
+          onSubmitted: (value) {
+            // 検索履歴に追加
+            final notifier = ref.read(searchNotifierProvider.notifier);
+            notifier.addData(value);
+            // 検索ワードを更新
+            final searchNotifier =
+                ref.read(searchWordNotifierProvider.notifier);
+            searchNotifier.newSearch(value);
+            // Focusを外す
+            FocusScope.of(context).unfocus();
+          },
+
           suggestionsBuilder: (BuildContext context, SearchController controller) {
             return List<Widget>.from(searchWords.reversed.map((item) {
               // 新しいものから順に取り出したいのでreversed
@@ -140,7 +129,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 return const SizedBox.shrink();
               }
             }));
-          },
+          }
         );
       }
     );
