@@ -122,15 +122,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               if (item.isNotEmpty) {
                 return ListTile(
                   title: Text(item),
-                  // 履歴削除ボタン
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      // // 履歴から削除
-                      // final notifier = ref.read(searchNotifierProvider.notifier);
-                      // notifier.removeData(item);
-                    },
-                  ),
+                  // ReRenderingできないから履歴削除ボタンはなし
                   onTap: () {
                     controller.closeView(item);
                     // 検索履歴を更新
@@ -161,8 +153,9 @@ class CardListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 検索ワードの変化を追う
     final searchWord = ref.watch(searchWordNotifierProvider);
-    if (searchWord != '') {
+    if (searchWord.isNotEmpty) {
       return FutureBuilder<Map<String, String>>(
         future: fetchSearchResult(keyword: searchWord),
         builder: (BuildContext context,
@@ -196,7 +189,7 @@ class CardListView extends ConsumerWidget {
         },
       );
     } else {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
   }
 }
