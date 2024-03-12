@@ -1,5 +1,9 @@
 import 'package:first_app/data/settingsdata.dart';
+import 'package:first_app/pages/favorite.dart';
+import 'package:first_app/pages/history.dart';
 import 'package:first_app/pages/home.dart';
+import 'package:first_app/pages/search.dart';
+import 'package:first_app/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // import追加
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,9 +44,12 @@ class MyApp extends ConsumerWidget {
         Locale("ja", "JP"),
       ],
       // Homeにあるホーム画面を呼び出す
-      home: const Home(),
+      home:  Home(),
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => const Home(),
+        '/search': (BuildContext context) =>  Search(),
+        '/favorite': (BuildContext context) =>  Favorite(),
+        '/history': (BuildContext context) =>  History(),
+        '/settings': (BuildContext context) =>  Settings(),
       },
     );
   }

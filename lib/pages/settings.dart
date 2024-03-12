@@ -31,7 +31,7 @@ class Settings extends ConsumerWidget {
           ),
           Card(
             child: SwitchListTile(
-              title: const Text("更新チェック"),
+              title: const Text("自動更新チェック"),
               subtitle: const Text("そのうち追加します"),
               value: settings['autoUpdate'] ?? false,
               onChanged: (bool value) {},

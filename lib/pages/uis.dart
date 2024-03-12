@@ -1,10 +1,6 @@
 import 'package:first_app/data/searchdata.dart';
 import 'package:first_app/data/searchworddata.dart';
 import 'package:first_app/data/settingsdata.dart';
-import 'package:first_app/pages/favorite.dart';
-import 'package:first_app/pages/history.dart';
-import 'package:first_app/pages/search.dart';
-import 'package:first_app/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -124,10 +120,7 @@ class MyDrawer extends StatelessWidget {
                       final notifier =
                           ref.read(searchWordNotifierProvider.notifier);
                       notifier.newSearch("");
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const Search(),
-                        settings: const RouteSettings(name: "/search"),
-                      ));
+                      Navigator.of(context).pushNamed('/search');
                     }
                   },
                 );
@@ -140,10 +133,7 @@ class MyDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 if (index != 2) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const Favorite(),
-                    settings: const RouteSettings(name: "/favorite"),
-                  ));
+                  Navigator.of(context).pushNamed('/favorite');
                 }
               },
             ),
@@ -154,10 +144,7 @@ class MyDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 if (index != 3) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const History(),
-                    settings: const RouteSettings(name: "/history"),
-                  ));
+                  Navigator.of(context).pushNamed('/history');
                 }
               },
             ),
@@ -168,10 +155,7 @@ class MyDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 if (index != 4) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const Settings(),
-                    settings: const RouteSettings(name: "/settings"),
-                  ));
+                  Navigator.of(context).pushNamed('/settings');
                 }
               },
             ),
@@ -233,10 +217,7 @@ class MySearchBar extends ConsumerWidget {
               final searchNotifier =
                   ref.read(searchWordNotifierProvider.notifier);
               searchNotifier.newSearch(value);
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const Search(),
-                settings: const RouteSettings(name: "/search"),
-              ));
+              Navigator.of(context).pushNamed('/search');
             },
           ),
           suffixIcon: IconButton(
@@ -261,11 +242,7 @@ class MySearchBar extends ConsumerWidget {
           // 検索ワードを更新
           final searchNotifier = ref.read(searchWordNotifierProvider.notifier);
           searchNotifier.newSearch(value);
-          Navigator.of(context).pop();
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const Search(),
-            settings: const RouteSettings(name: "/search"),
-          ));
+          Navigator.of(context).pushNamed('/search');
         },
       ),
     );
