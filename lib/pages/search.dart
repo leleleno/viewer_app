@@ -3,7 +3,6 @@ import 'package:first_app/data/favoritedata.dart';
 import 'package:first_app/data/historydata.dart';
 import 'package:first_app/data/searchdata.dart';
 import 'package:first_app/data/searchworddata.dart';
-import 'package:first_app/data/settingsdata.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +31,7 @@ class _SearchState extends State<Search> {
           Positioned.fill(
               top: AppBar().preferredSize.height +
                   MediaQuery.of(context).padding.top +
-                  32.0,
+                  16.0,
               // ignore: prefer_const_constructors
               child: SingleChildScrollView(child: CardListView())),
           // ignore: prefer_const_constructors
@@ -54,98 +53,104 @@ class _SearchState extends State<Search> {
   }
 }
 
-class CustomSearchBar extends ConsumerWidget {
+class CustomSearchBar extends StatefulWidget {
   const CustomSearchBar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 検索履歴を監視
-    final searchWords = ref.watch(searchNotifierProvider);
-    // 検索ワードを監視
-    final searchWord = ref.watch(searchWordNotifierProvider);
-    // // 検索バーに最初に入れるワード
-    // TextEditingController controller = TextEditingController(
-    //   text: searchWords.last,
-    // );
-    // // カーソルが一番後ろに合うように
-    // controller.selection = TextSelection.fromPosition(
-    //     TextPosition(offset: controller.text.length));
-    return SearchAnchor(
-      isFullScreen: false,
-      builder: (BuildContext context, SearchController controller) {
-        return SearchBar(
-          controller: controller,
-          padding: const MaterialStatePropertyAll<EdgeInsets>(
-            EdgeInsets.symmetric(horizontal: 16.0),
-          ),
-          // Tapで開く
-          onTap: () {
-            controller.openView();
-          },
-          onChanged: (value) {
-            // 検索履歴に追加
-            final notifier = ref.read(searchNotifierProvider.notifier);
-            notifier.addData(value);
-            // 検索ワードを更新
-            final searchNotifier =
-                ref.read(searchWordNotifierProvider.notifier);
-            searchNotifier.newSearch(value);
-          },
-          // ワードで検索
-          onSubmitted: (value) {
-            // 検索履歴に追加
-            final notifier = ref.read(searchNotifierProvider.notifier);
-            notifier.addData(value);
-            // 検索ワードを更新
-            final searchNotifier =
-                ref.read(searchWordNotifierProvider.notifier);
-            searchNotifier.newSearch(value);
-            // // Focusを外す
-            // FocusScope.of(context).unfocus();
-          },
-          leading: IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              String value = controller.text;
-              // 検索履歴に追加
-              final notifier = ref.read(searchNotifierProvider.notifier);
-              notifier.addData(value);
-              // 検索ワードを更新
-              final searchNotifier =
-                  ref.read(searchWordNotifierProvider.notifier);
-              searchNotifier.newSearch(value);
-            },
-          ),
-        );
-      },
-      // サジェスト：検索履歴
-      suggestionsBuilder: (BuildContext context, SearchController controller) {
-        return List<Widget>.generate(searchWords.length, (int index) {
-          final String item = List.from(searchWords.reversed)[index];
-          if (item != '') {
-            return ListTile(
-              title: Text(item),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
+  State<CustomSearchBar> createState() => _CustomSearchBarState();
+}
+
+class _CustomSearchBarState extends State<CustomSearchBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      // 検索履歴を監視
+      final searchWords = ref.watch(searchNotifierProvider);
+      // 検索ワードを監視
+      final searchWord = ref.watch(searchWordNotifierProvider);
+      TextEditingController _controller = TextEditingController(text: searchWords.last ?? searchWord);
+      _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+        return SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController _controller) {
+            return SearchBar(
+              controller: _controller,
+              padding: const MaterialStatePropertyAll<EdgeInsets>(
+                EdgeInsets.symmetric(horizontal: 16.0),
+              ),
+              // 先頭に検索ボタン
+              leading: IconButton(
+                icon: const Icon(Icons.search),
                 onPressed: () {
-                  // 履歴から削除
+                  String value = _controller.text;
+                  // 検索履歴に追加
                   final notifier = ref.read(searchNotifierProvider.notifier);
-                  notifier.removeData(item);
+                  notifier.addData(value);
+                  // 検索ワードを更新
+                  final searchNotifier =
+                      ref.read(searchWordNotifierProvider.notifier);
+                  searchNotifier.newSearch(value);
                 },
               ),
+              // 後方にオプション開くボタン
+              trailing: [IconButton(icon: const Icon(Icons.add),onPressed: (){},)],
+              // Tapで開く
               onTap: () {
-                controller.closeView(item);
+                _controller.openView();
+              },
+              // barの中身が変わったら
+              onChanged: (value) {},
+              // ワードで検索
+              onSubmitted: (value) {
+                // 検索履歴に追加
+                final notifier = ref.read(searchNotifierProvider.notifier);
+                notifier.addData(value);
                 // 検索ワードを更新
                 final searchNotifier =
                     ref.read(searchWordNotifierProvider.notifier);
-                searchNotifier.newSearch(item);
+                searchNotifier.newSearch(value);
+                // Focusを外す
+                FocusScope.of(context).unfocus();
               },
             );
-          } else {
-            return const SizedBox.shrink();
-          }
-        });
-      },
+          },
+          // サジェスト：検索履歴
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return List<Widget>.from(searchWords.reversed.map((item) {
+              // 新しいものから順に取り出したいのでreversed
+              if (item.isNotEmpty) {
+                return ListTile(
+                  title: Text(item),
+                  // 履歴削除ボタン
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      // // 履歴から削除
+                      // final notifier = ref.read(searchNotifierProvider.notifier);
+                      // notifier.removeData(item);
+                    },
+                  ),
+                  onTap: () {
+                    controller.closeView(item);
+                    // 検索履歴を更新
+                    final notifier = ref.read(searchNotifierProvider.notifier);
+                    notifier.addData(item);
+                    // 検索ワードを更新
+                    final searchNotifier =
+                        ref.read(searchWordNotifierProvider.notifier);
+                    searchNotifier.newSearch(item);
+                    // Focusを外す
+                    FocusScope.of(context).unfocus();
+                  },
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            }));
+          },
+        );
+      }
     );
   }
 }
