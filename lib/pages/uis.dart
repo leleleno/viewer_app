@@ -53,12 +53,10 @@ class _CommonScaffoldState extends State<CommonScaffold> {
               ),
             ],
           ),
-          SliverToBoxAdapter(
-            child: Visibility(
-                visible: isVisible,
-                child: const MySearchBar(
-                  isFocus: true,
-                )),
+          const SliverToBoxAdapter(
+            child: MySearchBar(
+              isFocus: false,
+            ),
           ),
           SliverToBoxAdapter(
             child: widget.body,
