@@ -14,61 +14,59 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Future<void> _checkDialogShown() async {
-    // 一度ダイアログを表示したかチェック
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool dialogShown = prefs.getBool('dialogShown') ?? false;
-    // updatableかチェック
-    // GithubのAPIから最新のリリース情報を取得
-    final response = await http.get(Uri.parse(
-        'https://api.github.com/repos/leleleno/viewer_app/releases/latest'));
-    // 通信成功時
-    if (response.statusCode == 200) {
-      // json decode
-      final Map body = jsonDecode(response.body).map();
-      final latestRelease = body['tag_name'];
-      // 現在のバージョン・ビルドナンバーを取得
-      PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      String version = packageInfo.version;
-      // version: 1.0.0, latestRelease: v1.0.0
-      bool updatable = RegExp(version).hasMatch(latestRelease);
-      if (!dialogShown && updatable) {
-        // 非同期処理の完了を待機
-        // await _checkUpdatable();
-      }
-    }
-    // どちらにしろいちど起動したことは記録しておく
-    prefs.setBool('dialogShown', true);
-  }
 
-  // Future<void> _checkUpdatable() async {
-  //   showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text("アップデートがあります"),
-  //           actions: [
-  //             GestureDetector(
-  //               child: const Text("キャンセル"),
-  //               onTap: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //             GestureDetector(
-  //               child: const Text('アップデート'),
-  //               onTap: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             )
-  //           ],
-  //         );
-  //       });
-  // }
+  bool _dialogShown = false;
 
   @override
-  void initState() {
-    super.initState();
-    _checkDialogShown();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 一度ダイアログを表示したかチェック
+    SharedPreferences.getInstance().then((prefs) {
+      _dialogShown = prefs.getBool('dialogShown') ?? false;
+    });
+    // updatableかチェック
+    // GithubのAPIから最新のリリース情報を取得
+    http.get(Uri.parse('https://api.github.com/repos/leleleno/viewer_app/releases/latest'))
+        .then((response) {
+      // 通信成功時
+      if (response.statusCode == 200) {
+        // json decode
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        final latestRelease = body['tag_name'];
+        // 現在のバージョン・ビルドナンバーを取得
+        PackageInfo.fromPlatform().then((packageInfo) {
+          String version = packageInfo.version;
+          // version: 1.0.0, latestRelease: v1.0.0
+          bool updatable = RegExp(version).hasMatch(latestRelease);
+          if (!_dialogShown && updatable){
+            showDialog(
+              context: context,
+              builder: (context)=> AlertDialog(
+                title: const Text("アップデートがあります", style: TextStyle(fontSize: 18),),
+                actions: [
+                  TextButton(
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("キャンセル", style: TextStyle(color: Colors.red),),
+                  ),
+                  TextButton(
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("インストール", style: TextStyle(color: Colors.blue),),
+                  ),
+                ],
+              )
+            );
+            // どちらにしろいちど起動したことは記録しておく
+            SharedPreferences.getInstance().then((prefs) {
+              prefs.setBool('dialogShown', true);
+            });
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -90,3 +88,4 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
