@@ -25,29 +25,32 @@ class _HomeState extends State<Home> {
     SharedPreferences.getInstance().then((prefs) {
       _dialogShown = prefs.getBool('dialogShown') ?? false;
     });
-    // updatableかチェック
-    // GithubのAPIから最新のリリース情報を取得
-    http.get(Uri.parse('https://api.github.com/repos/leleleno/viewer_app/releases/latest'))
-        .then((response) {
-      // 通信成功時
-      if (response.statusCode == 200) {
-        // json decode
-        final Map<String, dynamic> body = jsonDecode(response.body);
-        final latestRelease = body['tag_name'];
-        // 現在のバージョン・ビルドナンバーを取得
-        PackageInfo.fromPlatform().then((packageInfo) {
-          String version = packageInfo.version;
-          // version: 1.0.0, latestRelease: v1.0.0
-          bool updatable = RegExp(version).hasMatch(latestRelease);
-          if (!_dialogShown && updatable){
-            _showDialog = true;
-            SharedPreferences.getInstance().then((prefs) {
-              prefs.setBool('dialogShown', true);
-            });
-          }
-        });
-      }
-    });
+    // もし表示されてなかったら
+    if (!_dialogShown){
+      // updatableかチェック
+      // GithubのAPIから最新のリリース情報を取得
+      http.get(Uri.parse('https://api.github.com/repos/leleleno/viewer_app/releases/latest'))
+          .then((response) {
+        // 通信成功時
+        if (response.statusCode == 200) {
+          // json decode
+          final Map<String, dynamic> body = jsonDecode(response.body);
+          final latestRelease = body['tag_name'];
+          // 現在のバージョン・ビルドナンバーを取得
+          PackageInfo.fromPlatform().then((packageInfo) {
+            String version = packageInfo.version;
+            // version: 1.0.0, latestRelease: v1.0.0
+            bool updatable = RegExp(version).hasMatch(latestRelease);
+            if (!_dialogShown && updatable){
+              _showDialog = true;
+              SharedPreferences.getInstance().then((prefs) {
+                prefs.setBool('dialogShown', true);
+              });
+            }
+          });
+        }
+      });
+    }
   }
 
   @override
@@ -69,6 +72,7 @@ class _HomeState extends State<Home> {
     //           TextButton(
     //             onPressed: (){
     //               Navigator.of(context).pop();
+    //               downloadLink = body["assets"]["browser_download_url"]
     //             },
     //             child: const Text("インストール", style: TextStyle(color: Colors.blue),),
     //           ),
