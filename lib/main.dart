@@ -44,12 +44,12 @@ class MyApp extends ConsumerWidget {
         Locale("ja", "JP"),
       ],
       // Homeにあるホーム画面を呼び出す
-      home:  Home(),
+      home: const Home(),
       routes: <String, WidgetBuilder>{
-        '/search': (BuildContext context) =>  Search(),
-        '/favorite': (BuildContext context) =>  Favorite(),
-        '/history': (BuildContext context) =>  History(),
-        '/settings': (BuildContext context) =>  Settings(),
+        '/search': (BuildContext context) => Search(),
+        '/favorite': (BuildContext context) => Favorite(),
+        '/history': (BuildContext context) => History(),
+        '/settings': (BuildContext context) => Settings(),
       },
     );
   }
