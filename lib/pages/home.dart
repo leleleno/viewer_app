@@ -52,30 +52,31 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    if (_showDialog == true){
-      Future.delayed(Duration.zero, ()=>
-        showDialog(
-          context: context,
-          builder: (context)=> AlertDialog(
-            title: const Text("アップデートがあります", style: TextStyle(fontSize: 18),),
-            actions: [
-              TextButton(
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-                child: const Text("キャンセル", style: TextStyle(color: Colors.red),),
-              ),
-              TextButton(
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-                child: const Text("インストール", style: TextStyle(color: Colors.blue),),
-              ),
-            ],
-          )
-        )
-      );
-    }
+    // update dialog
+    // if (_showDialog == true){
+    //   Future.delayed(Duration.zero, ()=>
+    //     showDialog(
+    //       context: context,
+    //       builder: (context)=> AlertDialog(
+    //         title: const Text("アップデートがあります", style: TextStyle(fontSize: 18),),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: (){
+    //               Navigator.of(context).pop();
+    //             },
+    //             child: const Text("キャンセル", style: TextStyle(color: Colors.red),),
+    //           ),
+    //           TextButton(
+    //             onPressed: (){
+    //               Navigator.of(context).pop();
+    //             },
+    //             child: const Text("インストール", style: TextStyle(color: Colors.blue),),
+    //           ),
+    //         ],
+    //       )
+    //     )
+    //   );
+    // }
     return const CommonScaffold(
       title: 'ホーム',
       index: 0,
