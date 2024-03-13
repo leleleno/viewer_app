@@ -1,6 +1,7 @@
 import 'package:charset_converter/charset_converter.dart';
 import 'package:first_app/data/favoritedata.dart';
 import 'package:first_app/data/searchdata.dart';
+import 'package:first_app/data/searchsettingsdata.dart';
 import 'package:first_app/data/searchworddata.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
@@ -70,6 +71,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       final searchWords = ref.watch(searchNotifierProvider);
       // 検索ワードを監視
       final searchWord = ref.watch(searchWordNotifierProvider);
+      // 検索設定を確認
+      final searchSettings = ref.watch(searchSettingsNotifierProvider);
       // 最初に入れるワード設定→再描画関係でエラー出るからやめる
       // _searchController.text = searchWords.last ?? searchWord;
       // _searchController.selection = TextSelection.fromPosition(TextPosition(offset: _searchController.text.length));
@@ -87,10 +90,17 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               final searchNotifier =
                   ref.read(searchWordNotifierProvider.notifier);
               searchNotifier.newSearch(value);
+              // Focusを外す
+              _searchController.closeView(value);
             },
           ),
           // 後方にオプション開くボタン
-          barTrailing: [IconButton(icon: const Icon(Icons.more_vert),onPressed: (){},)],
+          barTrailing: [PopupMenuButton(
+            itemBuilder: (BuildContext context){
+              List keys = List.from(searchSettings.keys);
+              return keys.map((key) => PopupMenuItem(child: Text("$key: ${searchSettings[key]}"))).toList();
+            }
+          )],
           // Tapで開く
           onTap: () {
             // _searchController.openView();
@@ -152,9 +162,19 @@ class CardListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // 検索ワードの変化を追う
     final searchWord = ref.watch(searchWordNotifierProvider);
+    // 検索設定を把握
+    final searchSettings = ref.watch(searchSettingsNotifierProvider);
     if (searchWord.isNotEmpty) {
       return FutureBuilder<Map<String, String>>(
-        future: fetchSearchResult(keyword: searchWord),
+        future: fetchSearchResult(
+          keyword: searchWord,
+          // 検索設定を反映
+          searchMode: searchSettings["mode"] ?? "AND",
+          cardTarget: searchSettings["cardTarget"] ?? true,
+          deckTarget: searchSettings["cardTarget"] ?? false,
+          articleTarget: searchSettings["articleTarget"] ?? false,
+          commentTarget: searchSettings["commentTarget"] ?? false,
+        ),
         builder: (BuildContext context,
             AsyncSnapshot<Map<String, String>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
