@@ -16,6 +16,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   bool _dialogShown = false;
+  bool _showDialog = false;
 
   @override
   void didChangeDependencies() {
@@ -39,27 +40,7 @@ class _HomeState extends State<Home> {
           // version: 1.0.0, latestRelease: v1.0.0
           bool updatable = RegExp(version).hasMatch(latestRelease);
           if (!_dialogShown && updatable){
-            showDialog(
-              context: context,
-              builder: (context)=> AlertDialog(
-                title: const Text("アップデートがあります", style: TextStyle(fontSize: 18),),
-                actions: [
-                  TextButton(
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("キャンセル", style: TextStyle(color: Colors.red),),
-                  ),
-                  TextButton(
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("インストール", style: TextStyle(color: Colors.blue),),
-                  ),
-                ],
-              )
-            );
-            // どちらにしろいちど起動したことは記録しておく
+            _showDialog = true;
             SharedPreferences.getInstance().then((prefs) {
               prefs.setBool('dialogShown', true);
             });
@@ -71,6 +52,30 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showDialog == true){
+      Future.delayed(Duration.zero, ()=>
+        showDialog(
+          context: context,
+          builder: (context)=> AlertDialog(
+            title: const Text("アップデートがあります", style: TextStyle(fontSize: 18),),
+            actions: [
+              TextButton(
+                onPressed: (){
+                  Navigator.of(context).pop();
+                },
+                child: const Text("キャンセル", style: TextStyle(color: Colors.red),),
+              ),
+              TextButton(
+                onPressed: (){
+                  Navigator.of(context).pop();
+                },
+                child: const Text("インストール", style: TextStyle(color: Colors.blue),),
+              ),
+            ],
+          )
+        )
+      );
+    }
     return const CommonScaffold(
       title: 'ホーム',
       index: 0,
