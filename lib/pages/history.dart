@@ -3,6 +3,7 @@ import 'package:first_app/data/historydata.dart';
 import 'package:first_app/pages/card.dart';
 import 'package:first_app/pages/uis.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -90,6 +91,11 @@ class HistoryCardTile extends StatelessWidget {
                     ),
                     settings: RouteSettings(name: "/card/$key"),
                   ));
+                },
+                onLongPress: (){
+                  final data = ClipboardData(text: url);
+                  Clipboard.setData(data);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('URLをコピーしました')));
                 },
               ),
             ),

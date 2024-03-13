@@ -39,7 +39,7 @@ class _CommonScaffoldState extends State<CommonScaffold> {
         slivers: [
           SliverAppBar(
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: Text(widget.title),
+            title: FittedBox(fit: BoxFit.fitWidth, child: Text(widget.title, overflow: TextOverflow.fade,)),
             pinned: false,
             floating: true,
             actions: [
@@ -53,9 +53,12 @@ class _CommonScaffoldState extends State<CommonScaffold> {
               ),
             ],
           ),
-          const SliverToBoxAdapter(
-            child: MySearchBar(
-              isFocus: false,
+          SliverToBoxAdapter(
+            child: Visibility(
+              visible: isVisible,
+              child: const MySearchBar(
+                isFocus: true,
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -64,6 +67,27 @@ class _CommonScaffoldState extends State<CommonScaffold> {
         ],
       ),
       floatingActionButton: widget.floatingActionButton,
+    );
+  }
+}
+
+class MySliverAppBar extends StatelessWidget{
+  const MySliverAppBar({super.key, required this.title,});
+  final String title;
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      title: Text(title),
+      pinned: false,
+      floating: true,
+      actions: [
+        IconButton(
+          onPressed: () {
+          },
+          icon: const Icon(Icons.search),
+        ),
+      ],
     );
   }
 }
