@@ -66,22 +66,21 @@ class CardView extends StatelessWidget {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text('外部リンクを開きます'),
-                                    content: Text(url),
+                                    title: const Text('外部リンクを開きます', style: TextStyle(fontSize: 18)),
+                                    content: SelectableText(url),
                                     actions: [
-                                      GestureDetector(
-                                        child: const Text("キャンセル"),
-                                        onTap: () {
+                                      TextButton(
+                                        onPressed: (){
                                           Navigator.of(context).pop();
-                                        },
+                                          },
+                                        child: const Text("キャンセル", style: TextStyle(color: Colors.red),),
                                       ),
-                                      GestureDetector(
-                                        child: const Text('続行'),
-                                        onTap: () {
+                                      TextButton(
+                                        onPressed: (){
                                           Navigator.of(context).pop();
-                                          launchUrlString(url);
-                                        },
-                                      )
+                                          },
+                                        child: const Text("続ける", style: TextStyle(color: Colors.blue),),
+                                      ),
                                     ],
                                   );
                                 });
@@ -124,10 +123,11 @@ class CardView extends StatelessWidget {
   }
 }
 
-Future<String> fetchCardData(BuildContext context, String? pageUrl) async {
+Future<String> fetchCardData(BuildContext context, String pageUrl) async {
   // 取得先のURLを元にして、Uriオブジェクトを生成する。
+  // Uriオブジェクトにhttpリクエスト
   final response = await http.get(
-    Uri.parse(pageUrl!),
+    Uri.parse(pageUrl),
   );
   // responseの成否で判定
   if (response.statusCode != 200) {
