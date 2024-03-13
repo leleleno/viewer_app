@@ -75,6 +75,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       // _searchController.selection = TextSelection.fromPosition(TextPosition(offset: _searchController.text.length));
         return SearchAnchor.bar(
           searchController: _searchController,
+          isFullScreen: false,
           barLeading: IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
