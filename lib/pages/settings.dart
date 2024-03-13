@@ -52,7 +52,9 @@ class Settings extends ConsumerWidget {
             child: ListTile(
               title: const Text('アップデートを確認'),
               subtitle: const Text('そのうち追加します'),
-              onTap: () {},
+              onTap: () {
+    //               downloadLink = body["assets"]["browser_download_url"];
+              },
             ),
           ),
         ],
