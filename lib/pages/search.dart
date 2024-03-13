@@ -97,8 +97,71 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           // 後方にオプション開くボタン
           barTrailing: [PopupMenuButton(
             itemBuilder: (BuildContext context){
-              List keys = List.from(searchSettings.keys);
-              return keys.map((key) => PopupMenuItem(child: Text("$key: ${searchSettings[key]}"))).toList();
+              return [
+                // AND <-> ORのボタン
+                PopupMenuItem(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("検索モード"),
+                      PopupMenuButton(itemBuilder: (BuildContext context){
+                        return [
+                          PopupMenuItem(
+                            onTap: (){
+                              final notifier = ref.read(searchSettingsNotifierProvider.notifier);
+                              notifier.changeSettings("mode", "AND") ;
+                            },
+                            child: const Text("AND"),
+                          ),
+                          PopupMenuItem(
+                            onTap: (){
+                              final notifier = ref.read(searchSettingsNotifierProvider.notifier);
+                              notifier.changeSettings("mode", "OR") ;
+                            },
+                            child: const Text("OR"),
+                          ),
+                        ];
+                      })
+                    ],
+                  ),
+                ),
+                // Cardtargetのボタン
+                CheckedPopupMenuItem(
+                  checked: searchSettings["cardTarget"],
+                  onTap: (){
+                    final notifier = ref.read(searchSettingsNotifierProvider.notifier);
+                    notifier.changeSettings("cardTarget", !searchSettings["cardTarget"]) ;
+                  },
+                  child: const Text("《カード》"),
+                ),
+                // Decktargetのボタン
+                CheckedPopupMenuItem(
+                  checked: searchSettings["deckTarget"],
+                  onTap: (){
+                    final notifier = ref.read(searchSettingsNotifierProvider.notifier);
+                    notifier.changeSettings("deckTarget", !searchSettings["deckTarget"]) ;
+                  },
+                  child: const Text("【デッキ】"),
+                ),
+                // articletargetのボタン
+                CheckedPopupMenuItem(
+                  checked: searchSettings["articleTarget"],
+                  onTap: (){
+                    final notifier = ref.read(searchSettingsNotifierProvider.notifier);
+                    notifier.changeSettings("articleTarget", !searchSettings["articleTarget"]) ;
+                  },
+                  child: const Text("その他"),
+                ),
+                // commenttargetのボタン
+                CheckedPopupMenuItem(
+                  checked: searchSettings["commentTarget"],
+                  onTap: (){
+                    final notifier = ref.read(searchSettingsNotifierProvider.notifier);
+                    notifier.changeSettings("commentTarget", !searchSettings["commentTarget"]) ;
+                  },
+                  child: const Text("コメント"),
+                ),
+              ];
             }
           )],
           // Tapで開く

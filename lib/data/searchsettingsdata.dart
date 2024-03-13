@@ -12,6 +12,11 @@ class SearchSettingsNotifier extends _$SearchSettingsNotifier {
     db.loadData();
     return {...db.searchSettings};
   }
+  void changeSettings(key, value){
+    db.changeSettings(key, value);
+    db.updateData();
+    state = {...db.searchSettings};
+  }
 }
 
 
