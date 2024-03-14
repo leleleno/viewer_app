@@ -4,7 +4,10 @@ Flutterによる遊戯王wikiビューワーアプリ開発
 For Android
 
 ## ダウンロード
-最新版![GitHub Release](https://img.shields.io/github/v/release/leleleno/viewer_app)は[ここから](https://github.com/leleleno/viewer_app/releases/latest "latest release")
+[![Codemagic build status](https://api.codemagic.io/apps/65ee32e94d7a230e7c0f78c2/65ee32e94d7a230e7c0f78c1/status_badge.svg)](https://codemagic.io/apps/65ee32e94d7a230e7c0f78c2/65ee32e94d7a230e7c0f78c1/latest_build)
+![GitHub Release](https://img.shields.io/github/v/release/leleleno/viewer_app)
+
+ダウンロードは[ここから](https://github.com/leleleno/viewer_app/releases/latest "latest release")
 
 
 ## Getting Started
