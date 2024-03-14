@@ -7,7 +7,7 @@ part of 'searchsettingsdata.dart';
 // **************************************************************************
 
 String _$searchSettingsNotifierHash() =>
-    r'b2aeef90c57d4f0f62379e83bdcd2892299af97c';
+    r'24880db47f3fa1a627010abaa4ef57514d148ef8';
 
 /// See also [SearchSettingsNotifier].
 @ProviderFor(SearchSettingsNotifier)
